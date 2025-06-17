@@ -1,0 +1,963 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quiz di Statistica Avanzato</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+      animation: pulse 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.5; }
+      50% { transform: scale(1.1); opacity: 0.8; }
+    }
+
+    .header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .header p {
+      font-size: 1.1rem;
+      opacity: 0.9;
+      position: relative;
+      z-index: 1;
+    }
+
+    .quiz-content {
+      padding: 40px;
+    }
+
+    .progress-bar {
+      background: #e0e0e0;
+      height: 8px;
+      border-radius: 4px;
+      margin-bottom: 30px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      background: linear-gradient(90deg, #4facfe, #00f2fe);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 4px;
+    }
+
+    .question-card {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      border: 1px solid #f0f0f0;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .question-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .question-number {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      margin-bottom: 15px;
+      font-size: 0.9rem;
+    }
+
+    .question-text {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #333;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+
+    .options {
+      display: grid;
+      gap: 12px;
+    }
+
+    .option {
+      background: #f8f9fa;
+      border: 2px solid #e9ecef;
+      border-radius: 10px;
+      padding: 15px 20px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .option:hover {
+      background: #e3f2fd;
+      border-color: #2196f3;
+      transform: translateX(5px);
+    }
+
+    .option.selected {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      border-color: #4facfe;
+      color: white;
+    }
+
+    .option input[type="radio"] {
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border: 2px solid #ddd;
+      border-radius: 50%;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .option input[type="radio"]:checked {
+      border-color: white;
+      background: white;
+    }
+
+    .option input[type="radio"]:checked::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 8px;
+      height: 8px;
+      background: #4facfe;
+      border-radius: 50%;
+    }
+
+    .submit-container {
+      text-align: center;
+      margin-top: 40px;
+    }
+
+    .submit-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1rem;
+      border-radius: 50px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .submit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      margin-top: 30px;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+      display: none;
+    }
+
+    .result.show {
+      display: block;
+      animation: slideIn 0.5s ease;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .score {
+      font-size: 3rem;
+      font-weight: bold;
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 10px;
+    }
+
+    .score-text {
+      font-size: 1.2rem;
+      color: #666;
+      margin-bottom: 20px;
+    }
+
+    .retry-btn {
+      background: linear-gradient(135deg, #ff6b6b, #ee5a52);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+    }
+
+    .retry-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        border-radius: 15px;
+      }
+      
+      .header h1 {
+        font-size: 2rem;
+      }
+      
+      .quiz-content {
+        padding: 20px;
+      }
+      
+      .question-card {
+        padding: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📊 Quiz di Statistica</h1>
+      <p>Metti alla prova le tue conoscenze statistiche</p>
+    </div>
+    
+    <div class="quiz-content">
+      <div class="progress-bar">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      
+      <form id="quizForm">
+        <div id="questions"></div>
+        <div class="submit-container">
+          <button type="submit" class="submit-btn" id="submitBtn">
+            🎯 Verifica Risposte
+          </button>
+        </div>
+      </form>
+      
+      <div class="result" id="result">
+        <div class="score" id="scoreDisplay"></div>
+        <div class="score-text" id="scoreText"></div>
+        <button class="retry-btn" onclick="location.reload()">
+          🔄 Riprova
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Utility functions
+    function randomBetween(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    function randomInt(min, max) {
+      return Math.floor(randomBetween(min, max + 1));
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function roundToDecimals(num, decimals) {
+      return Math.round(num * Math.pow(10, decimals)) / Math.pow(10, decimals);
+    }
+
+    // Question generators
+    const questionGenerators = [
+      // Test specifico ansia vs depressione - Commento finale
+      () => {
+        const N1 = randomInt(40, 55);
+        const N2 = randomInt(45, 60);
+        const M1 = roundToDecimals(randomBetween(4.0, 5.0), 1);
+        const M2 = roundToDecimals(randomBetween(3.0, 4.0), 1);
+        const mu = roundToDecimals(randomBetween(3.0, 4.0), 2);
+        
+        const comments = [
+          "Accetto H₀: Non c'è differenza significativa tra le medie",
+          "Rifiuto H₀: La media del campione è maggiore di quella della popolazione", 
+          "Accetto H₀: La media del campione è maggiore di quella della popolazione",
+          "Rifiuto H₀: Non c'è differenza significativa tra le medie"
+        ];
+        
+        const correct = M1 > mu ? "Rifiuto H₀: La media del campione è maggiore di quella della popolazione" : 
+                                 "Accetto H₀: Non c'è differenza significativa tra le medie";
+        const options = shuffle(comments);
+        
+        return {
+          text: `Verificare che gli individui con ansia (N=${N1}; M=${M1}) presentino una media nella scala di 'disturbo ossessivo compulsivo' diversa rispetto alla popolazione (μ=${mu}, σ=2.25). Dopo aver trovato il valore critico e il valore calcolato, il commento specifico da scrivere è:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test per campioni indipendenti vs appaiati
+      () => {
+        const N1 = randomInt(40, 50);
+        const N2 = randomInt(45, 55);
+        const M1 = roundToDecimals(randomBetween(4.0, 5.0), 1);
+        const M2 = roundToDecimals(randomBetween(3.0, 4.0), 1);
+        const s1 = roundToDecimals(randomBetween(1.0, 1.5), 2);
+        const s2 = roundToDecimals(randomBetween(1.1, 1.4), 2);
+        
+        const tests = [
+          "Test t per campioni appaiati",
+          "Test t per campione unico",
+          "Test t per campioni indipendenti", 
+          "Test z per campione unico"
+        ];
+        
+        const correct = "Test t per campioni indipendenti";
+        const options = shuffle(tests);
+        
+        return {
+          text: `Verificare che i pazienti con disturbo di ansia (N₁=${N1}, M₁=${M1}, s²₁=${s1}) abbiano un punteggio maggiore di irritabilità rispetto ai pazienti con depressione (N₂=${N2}, M₂=${M2}, s²₂=${s2}). Per risolvere il presente esercizio si utilizza un:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Valori critici specifici
+      () => {
+        const criticalValues = [
+          { value: "|1,66|", context: "test unilaterale α=0.05" },
+          { value: "|1,99|", context: "test bilaterale α=0.05" },
+          { value: "+1,96", context: "test unilaterale α=0.025" },
+          { value: "|1,66|", context: "gradi di libertà elevati" }
+        ];
+        
+        const selectedCritical = criticalValues[randomInt(0, criticalValues.length - 1)];
+        const distractors = ["|1,66|", "|1,99|", "+1,96", "|2,045|"].filter(v => v !== selectedCritical.value);
+        const options = shuffle([selectedCritical.value, ...distractors.slice(0, 3)]);
+        
+        return {
+          text: `Verificare che i pazienti con disturbo di ansia abbiano un punteggio maggiore di irritabilità rispetto ai pazienti con depressione. Il valore critico è uguale a:`,
+          options: options,
+          correct: options.indexOf(selectedCritical.value)
+        };
+      },
+
+      // Zone di rifiuto per test direzionali
+      () => {
+        const N1 = randomInt(40, 50);
+        const N2 = randomInt(45, 55);
+        const M1 = roundToDecimals(randomBetween(4.0, 5.0), 1);
+        const M2 = roundToDecimals(randomBetween(3.0, 4.0), 1);
+        const s1 = roundToDecimals(randomBetween(1.0, 1.5), 2);
+        const s2 = roundToDecimals(randomBetween(1.1, 1.4), 2);
+        
+        const zones = [
+          "sotto la coda di sinistra",
+          "al centro, compresa tra le due code", 
+          "sotto entrambe le code",
+          "sotto la coda di destra"
+        ];
+        
+        const correct = M1 > M2 ? "sotto la coda di destra" : "sotto la coda di sinistra";
+        const options = shuffle(zones);
+        
+        return {
+          text: `Verificare che i pazienti con disturbo di ansia (N₁=${N1}, M₁=${M1}, s²₁=${s1}) abbiano un punteggio maggiore di irritabilità rispetto ai pazienti con depressione (N₂=${N2}, M₂=${M2}, s²₂=${s2}). La zona di rifiuto di H₀ si trova:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Calcolo del valore t
+      () => {
+        const M1 = roundToDecimals(randomBetween(4.0, 5.0), 1);
+        const M2 = roundToDecimals(randomBetween(3.0, 4.0), 1);
+        const devStd = roundToDecimals(randomBetween(0.15, 0.35), 2);
+        const tValue = roundToDecimals(Math.abs(M1 - M2) / devStd, 2);
+        
+        const sign = M1 > M2 ? '+' : '-';
+        const correct = `${sign}${tValue}`;
+        
+        const distractors = [
+          `${sign}${roundToDecimals(tValue + randomBetween(0.5, 1.0), 2)}`,
+          `${sign}${roundToDecimals(tValue - randomBetween(0.3, 0.8), 2)}`,
+          `${sign === '+' ? '-' : '+'}${tValue}`
+        ];
+        
+        const options = shuffle([correct, ...distractors]);
+        
+        return {
+          text: `Sapendo che la stima della deviazione standard della differenza è ${devStd}, il valore calcolato (approssimato a due cifre decimali) è uguale a:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Commenti finali per test t
+      () => {
+        const scenarios = [
+          {
+            result: "significativo",
+            correct: "Rifiuto H₀: i pazienti con disturbo di ansia hanno un punteggio maggiore",
+            distractors: [
+              "Accetto H₀: i pazienti con disturbo di ansia hanno un punteggio maggiore",
+              "Accetto H₀: non c'è differenza significativa tra le medie",
+              "Rifiuto H₀: non c'è differenza tra le medie"
+            ]
+          }
+        ];
+        
+        const scenario = scenarios[0];
+        const options = shuffle([scenario.correct, ...scenario.distractors]);
+        
+        return {
+          text: `Dopo aver trovato il valore critico e il valore calcolato per ansia vs depressione, il commento specifico da scrivere è:`,
+          options: options,
+          correct: options.indexOf(scenario.correct)
+        };
+      },
+
+      // Test per confronto medie
+      () => {
+        const conditions = [
+          { name: "ansia", range: [3.5, 5.5] },
+          { name: "depressione", range: [2.0, 4.0] },
+          { name: "stress", range: [4.0, 6.0] },
+          { name: "controllo", range: [1.5, 3.5] }
+        ];
+        
+        const cond1 = conditions[randomInt(0, conditions.length - 1)];
+        const cond2 = conditions.filter(c => c !== cond1)[randomInt(0, conditions.length - 2)];
+        
+        const N1 = randomInt(25, 80);
+        const N2 = randomInt(25, 80);
+        const M1 = roundToDecimals(randomBetween(cond1.range[0], cond1.range[1]), 1);
+        const M2 = roundToDecimals(randomBetween(cond2.range[0], cond2.range[1]), 1);
+        
+        const zones = [
+          "sotto la coda di destra",
+          "sotto la coda di sinistra", 
+          "al centro, compresa tra le due code",
+          "sotto entrambe le code"
+        ];
+        
+        const correct = M1 > M2 ? "sotto la coda di destra" : "sotto la coda di sinistra";
+        const options = shuffle(zones);
+        
+        return {
+          text: `Verificare che i pazienti con ${cond1.name} (N₁=${N1}; M₁=${M1}) abbiano un punteggio ${M1 > M2 ? 'maggiore' : 'minore'} rispetto ai pazienti con ${cond2.name} (N₂=${N2}; M₂=${M2}). La zona di rifiuto di H₀ si trova:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // ANOVA - Test F per più gruppi 
+      () => {
+        const generationNames = ["Generazione X", "Generazione Y", "Generazione Z", "Baby Boomers", "Millennials"];
+        const selectedGens = shuffle(generationNames).slice(0, 3);
+        
+        const tests = [
+          "Test per campioni appaiati",
+          "Test di correlazione",
+          "Test del Chi quadro", 
+          "Test F di Fisher"
+        ];
+        
+        const correct = "Test F di Fisher";
+        const options = shuffle(tests);
+        
+        return {
+          text: `Verificare che il tipo di generazione (${selectedGens.join(', ')}) influenzi il punteggio in una scala di depressione. Quale test si utilizza?`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // ANOVA - Ipotesi alternativa
+      () => {
+        const contexts = [
+          { factor: "tipo di generazione", outcome: "punteggio di depressione" },
+          { factor: "tipo di terapia", outcome: "livelli di ansia" },
+          { factor: "livello di istruzione", outcome: "soddisfazione lavorativa" }
+        ];
+        
+        const context = contexts[randomInt(0, contexts.length - 1)];
+        
+        const hypotheses = [
+          "Ci sia differenza tra i gruppi",
+          `Il ${context.factor} non influenza il ${context.outcome}`,
+          "Le variabili siano dipendenti",
+          "Le variabili non siano dipendenti"
+        ];
+        
+        const correct = "Ci sia differenza tra i gruppi";
+        const options = shuffle(hypotheses);
+        
+        return {
+          text: `Verificare che il ${context.factor} influenzi il ${context.outcome}. L'ipotesi alternativa H₁ è:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // ANOVA - Media generale
+      () => {
+        const M1 = roundToDecimals(randomBetween(3.0, 4.0), 2);
+        const M2 = roundToDecimals(randomBetween(3.5, 4.5), 2);
+        const M3 = roundToDecimals(randomBetween(4.0, 5.0), 2);
+        
+        const meanSum = M1 + M2 + M3;
+        const correctMG = roundToDecimals(meanSum / 3, 2);
+        
+        const N = randomInt(12, 18);
+        const sumX = randomInt(45, 70);
+        
+        const correct = `ΣM/k = (${M1} + ${M2} + ${M3}) / 3 = ${correctMG}`;
+        
+        const distractors = [
+          `Σx/k = ${sumX} /3 = ${roundToDecimals(sumX / 3, 2)}`,
+          `Σx/N = ${sumX} /${N} = ${roundToDecimals(sumX / N, 2)}`,
+          `ΣM/N = (${M1} + ${M2} + ${M3}) / ${N} = ${roundToDecimals(meanSum / N, 2)}`
+        ];
+        
+        const options = shuffle([correct, ...distractors]);
+        
+        return {
+          text: `Sapendo che M₁ = ${M1}, M₂ = ${M2}, M₃ = ${M3}, la media generale (MG) è uguale a:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // ANOVA - Valore F calcolato
+      () => {
+        const SSb = roundToDecimals(randomBetween(2.5, 4.0), 1);
+        const SSw = roundToDecimals(randomBetween(4.0, 6.0), 2);
+        const dfb = 2; // 3 gruppi - 1
+        const dfw = randomInt(11, 15); // N - k
+        
+        const MSb = roundToDecimals(SSb / dfb, 2);
+        const MSw = roundToDecimals(SSw / dfw, 2);
+        const F = roundToDecimals(MSb / MSw, 2);
+        
+        const distractors = [
+          roundToDecimals(SSb + SSw, 2),
+          roundToDecimals(SSb / SSw, 2),
+          roundToDecimals(SSw / SSb, 2)
+        ];
+        
+        const options = shuffle([F.toString(), ...distractors.map(d => d.toString())]);
+        
+        return {
+          text: `Sapendo che SS₈ = ${SSb} e SSw = ${SSw}, il valore calcolato (approssimato a due cifre decimali) è uguale a:`,
+          options: options,
+          correct: options.indexOf(F.toString())
+        };
+      },
+
+      // ANOVA - Commento risultati
+      () => {
+        const comments = [
+          "Accetto H₀: Vi è almeno una differenza significativa tra le medie dei campioni",
+          "Accetto H₀: Non vi è differenza significativa tra le medie dei campioni",
+          "Rifiuto H₀: Non vi è differenza significativa tra le medie dei campioni", 
+          "Rifiuto H₀: Vi è almeno una differenza significativa tra le medie dei campioni"
+        ];
+        
+        const correct = "Rifiuto H₀: Vi è almeno una differenza significativa tra le medie dei campioni";
+        const options = shuffle(comments);
+        
+        return {
+          text: `Dopo aver trovato il valore critico ed il valore calcolato, il commento da scrivere è:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // ANOVA - Commento grafico
+      () => {
+        const interpretations = [
+          "Il tipo di generazione non influenza il punteggio in una scala di depressione",
+          "Il tipo di generazione influenza il punteggio in una scala di depressione",
+          "C'è una differenza significativa tra i tre gruppi",
+          "Non c'è dipendenza tra le variabili"
+        ];
+        
+        const correct = "C'è una differenza significativa tra i tre gruppi";
+        const options = shuffle(interpretations);
+        
+        return {
+          text: `Dopo aver disegnato il grafico delle medie, il commento da scrivere è:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test di correlazione - Ipotesi alternativa
+      () => {
+        const variables = [
+          { var1: "insicurezza lavorativa", var2: "soddisfazione lavorativa" },
+          { var1: "età", var2: "memoria di lavoro" },
+          { var1: "stress", var2: "qualità del sonno" },
+          { var1: "autostima", var2: "prestazioni accademiche" }
+        ];
+        
+        const pair = variables[randomInt(0, variables.length - 1)];
+        
+        const hypotheses = [
+          "le due variabili non sono correlate",
+          "le due variabili sono correlate", 
+          "le due variabili non sono dipendenti",
+          "le due variabili sono dipendenti"
+        ];
+        
+        const correct = "le due variabili sono correlate";
+        const options = shuffle(hypotheses);
+        
+        return {
+          text: `Verificare l'associazione tra "${pair.var1}" e "${pair.var2}". Indicare quale è l'ipotesi alternativa (H₁) corretta:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test di correlazione - Valore critico
+      () => {
+        const criticalValues = ["|2,571|", "|2,447|", "+2.365", "|1,96|"];
+        const correct = "|2,571|";
+        const options = shuffle(criticalValues);
+        
+        return {
+          text: `Verificare l'associazione tra "insicurezza lavorativa" e "soddisfazione lavorativa". Il valore critico è uguale a:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test di correlazione - Zone di rifiuto 
+      () => {
+        const variables = [
+          { var1: "insicurezza lavorativa", var2: "soddisfazione lavorativa" },
+          { var1: "stress lavorativo", var2: "burnout" },
+          { var1: "ansia sociale", var2: "evitamento" }
+        ];
+        
+        const pair = variables[randomInt(0, variables.length - 1)];
+        
+        const zones = [
+          "sotto entrambe le code",
+          "sotto la coda di destra",
+          "al centro compresa tra le code", 
+          "sotto la coda di sinistra"
+        ];
+        
+        const correct = "sotto entrambe le code";
+        const options = shuffle(zones);
+        
+        return {
+          text: `Verificare l'associazione tra "${pair.var1}" e "${pair.var2}". La zona di rifiuto di H₀ si trova:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test di correlazione - Calcolo r di Pearson
+      () => {
+        const r_values = ["+0,61", "+0,97", "-0,97", "-0,75"];
+        const correct = r_values[randomInt(0, r_values.length - 1)];
+        const options = shuffle(r_values);
+        
+        return {
+          text: `Date le medie di X e Y, gli scarti dalla media e le deviazioni standard, calcolare il valore r di Pearson:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test di correlazione - Valore t calcolato  
+      () => {
+        const t_values = ["-4,89", "+1,53", "-2,74", "-6,56"];
+        const correct = t_values[randomInt(0, t_values.length - 1)];
+        const options = shuffle(t_values);
+        
+        return {
+          text: `Dopo aver calcolato il valore r di Pearson, il valore calcolato (approssimato a due cifre decimali) è uguale a:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Test di correlazione - Commento finale
+      () => {
+        const comments = [
+          "Accetto H₀: Non vi sono prove sufficienti per verificare le due variabili siano correlate",
+          "Rifiuto H₀: Le due variabili sono correlate significativamente e negativamente",
+          "Accetto H₀: Le due variabili sono correlate significativamente e negativamente", 
+          "Rifiuto H₀: Le due variabili sono dipendenti"
+        ];
+        
+        const correct = "Rifiuto H₀: Le due variabili sono correlate significativamente e negativamente";
+        const options = shuffle(comments);
+        
+        return {
+          text: `Dopo aver calcolato il valore critico e calcolato, il commento specifico da scrivere è:`,
+          options: options,
+          correct: options.indexOf(correct)
+        };
+      },
+
+      // Commenti generali per risultati significativi/non significativi
+      () => {
+        const scenarios = [
+          {
+            context: "test ANOVA significativo",
+            correct: "Rifiuto H₀: Vi è almeno una differenza significativa tra le medie dei campioni",
+            distractors: [
+              "Accetto H₀: Vi è almeno una differenza significativa tra le medie dei campioni",
+              "Accetto H₀: Non vi è differenza significativa tra le medie dei campioni", 
+              "Rifiuto H₀: Non vi è differenza significativa tra le medie dei campioni"
+            ]
+          },
+          {
+            context: "test t non significativo",
+            correct: "Accetto H₀: Non c'è differenza significativa tra le medie",
+            distractors: [
+              "Rifiuto H₀: Non c'è differenza significativa tra le medie",
+              "Accetto H₀: C'è differenza significativa tra le medie",
+              "Rifiuto H₀: C'è differenza significativa tra le medie"
+            ]
+          }
+        ];
+        
+        const scenario = scenarios[randomInt(0, scenarios.length - 1)];
+        const options = shuffle([scenario.correct, ...scenario.distractors]);
+        
+        return {
+          text: `Dopo aver confrontato il valore critico con il valore calcolato per un ${scenario.context}, il commento appropriato è:`,
+          options: options,
+          correct: options.indexOf(scenario.correct)
+        };
+      },
+
+      // Tipi di test statistici
+      () => {
+        const situations = [
+          {
+            scenario: "confrontare tre gruppi di età sui punteggi di memoria",
+            correct: "Test F di Fisher (ANOVA)",
+            distractors: ["Test per campioni appaiati", "Test di correlazione", "Test del Chi quadro"]
+          },
+          {
+            scenario: "verificare l'associazione tra due variabili categoriali",
+            correct: "Test del Chi quadro", 
+            distractors: ["Test F di Fisher", "Test per campioni appaiati", "Test di correlazione"]
+          },
+          {
+            scenario: "confrontare le misure prima e dopo un trattamento",
+            correct: "Test per campioni appaiati",
+            distractors: ["Test F di Fisher", "Test di correlazione", "Test del Chi quadro"]
+          }
+        ];
+        
+        const situation = situations[randomInt(0, situations.length - 1)];
+        const options = shuffle([situation.correct, ...situation.distractors]);
+        
+        return {
+          text: `Per ${situation.scenario}, quale test statistico è più appropriato?`,
+          options: options,
+          correct: options.indexOf(situation.correct)
+        };
+      }
+    ];
+
+    let currentQuestions = [];
+    let selectedAnswers = {};
+
+    function generateQuiz() {
+      const numQuestions = 10;
+      currentQuestions = [];
+      
+      // Genera domande casuali
+      for (let i = 0; i < numQuestions; i++) {
+        const generator = questionGenerators[randomInt(0, questionGenerators.length - 1)];
+        currentQuestions.push(generator());
+      }
+      
+      renderQuiz();
+    }
+
+    function renderQuiz() {
+      const container = document.getElementById('questions');
+      container.innerHTML = '';
+      
+      currentQuestions.forEach((question, index) => {
+        const questionDiv = document.createElement('div');
+        questionDiv.className = 'question-card';
+        
+        questionDiv.innerHTML = `
+          <div class="question-number">${index + 1}</div>
+          <div class="question-text">${question.text}</div>
+          <div class="options">
+            ${question.options.map((option, optIndex) => `
+              <label class="option" for="q${index}_${optIndex}">
+                <input type="radio" name="q${index}" value="${optIndex}" id="q${index}_${optIndex}">
+                <span>${String.fromCharCode(97 + optIndex)}. ${option}</span>
+              </label>
+            `).join('')}
+          </div>
+        `;
+        
+        container.appendChild(questionDiv);
+      });
+      
+      // Add event listeners for option selection
+      document.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+          const questionIndex = parseInt(this.name.substring(1));
+          selectedAnswers[questionIndex] = parseInt(this.value);
+          
+          // Update visual selection
+          const questionCard = this.closest('.question-card');
+          questionCard.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+          this.closest('.option').classList.add('selected');
+          
+          updateProgress();
+        });
+      });
+    }
+
+    function updateProgress() {
+      const answered = Object.keys(selectedAnswers).length;
+      const total = currentQuestions.length;
+      const percentage = (answered / total) * 100;
+      
+      document.getElementById('progressFill').style.width = percentage + '%';
+      
+      const submitBtn = document.getElementById('submitBtn');
+      if (answered === total) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '🎯 Verifica Risposte';
+      } else {
+        submitBtn.disabled = true;
+        submitBtn.textContent = `📝 Completa tutte le domande (${answered}/${total})`;
+      }
+    }
+
+    function calculateScore() {
+      let correct = 0;
+      
+      currentQuestions.forEach((question, index) => {
+        if (selectedAnswers[index] === question.correct) {
+          correct++;
+        }
+      });
+      
+      return {
+        correct: correct,
+        total: currentQuestions.length,
+        percentage: Math.round((correct / currentQuestions.length) * 100)
+      };
+    }
+
+    function showResults(score) {
+      const resultDiv = document.getElementById('result');
+      const scoreDisplay = document.getElementById('scoreDisplay');
+      const scoreText = document.getElementById('scoreText');
+      
+      scoreDisplay.textContent = `${score.correct}/${score.total}`;
+      
+      let message = '';
+      if (score.percentage >= 90) {
+        message = '🎉 Eccellente! Sei un esperto di statistica!';
+      } else if (score.percentage >= 70) {
+        message = '👏 Molto bene! Hai una buona conoscenza della statistica.';
+      } else if (score.percentage >= 50) {
+        message = '📚 Discreto! Continua a studiare per migliorare.';
+      } else {
+        message = '💪 Non mollare! Riprova dopo aver ripassato i concetti.';
+      }
+      
+      scoreText.textContent = `${message} (${score.percentage}%)`;
+      
+      resultDiv.classList.add('show');
+      resultDiv.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Event listeners
+    document.getElementById('quizForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const score = calculateScore();
+      showResults(score);
+    });
+
+    // Initialize quiz
+    generateQuiz();
+  </script>
+</body>
+</html>
