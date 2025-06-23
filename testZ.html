@@ -2,52 +2,264 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Test Z casuale</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Z - Distribuzione Normale</title>
   <style>
-    body {
-      background-color: #f4f8e3;
-      font-family: Arial, sans-serif;
-      padding: 30px;
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #fa709a;
+    }
+
     h1 {
+      color: #2c3e50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1.1em;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .exercise-card {
+      background: linear-gradient(135deg, #fff5f5 0%, #f0f8ff 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border-left: 5px solid #fa709a;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .exercise-card ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .exercise-card li {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-bottom: 15px;
+      padding: 15px;
+      background: rgba(255, 255, 255, 0.7);
+      border-radius: 10px;
+      border-left: 4px solid #fee140;
+    }
+
+    .exercise-card strong {
+      color: #e74c3c;
+      font-weight: 700;
+    }
+
+    .solution-button {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+      margin: 20px auto;
+      display: block;
+    }
+
+    .solution-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+    }
+
+    .solution-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 30px;
+      border-top: 5px solid #28a745;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .solution-card h2 {
+      color: #2c3e50;
+      font-size: 1.8em;
+      margin-bottom: 20px;
       text-align: center;
     }
-    ul, p {
-      font-size: 18px;
+
+    .solution-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 20px 0;
     }
-    button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+
+    .solution-card li {
+      font-size: 1.1em;
+      line-height: 1.6;
+      margin-bottom: 10px;
+      padding: 10px 15px;
+      background: rgba(255, 255, 255, 0.8);
+      border-radius: 8px;
+      border-left: 3px solid #17a2b8;
     }
-    #esercizio, #soluzione {
-      margin-top: 20px;
-    }
-    #soluzione {
-      display: none;
-      border-top: 2px solid #aaa;
-      padding-top: 20px;
-    }
+
     .formula {
       font-family: "Courier New", monospace;
-      background: #eef;
-      padding: 10px;
-      border-radius: 5px;
-      display: inline-block;
-      margin-top: 10px;
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 1.1em;
+      border: 2px solid #2196f3;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(33, 150, 243, 0.1);
+    }
+
+    .decision-box {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      border: 2px solid #28a745;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+    }
+
+    .decision-box.reject {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      border-color: #dc3545;
+    }
+
+    .comment-box {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      font-style: italic;
+    }
+
+    .new-exercise-button {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+      margin: 20px auto;
+      display: block;
+    }
+
+    .new-exercise-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    .hypothesis {
+      background: rgba(108, 117, 125, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border-left: 4px solid #6c757d;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .back-button {
+        position: static;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .exercise-card, .solution-card {
+        padding: 20px;
+      }
     }
   </style>
 </head>
 <body>
+  <a href="index.html" class="back-button">← Torna al Menu</a>
 
+  <div class="container">
+    <div class="header">
+      <h1>Test Z</h1>
+      <p class="subtitle">Distribuzione Normale - Deviazione Standard Nota</p>
+    </div>
 
+    <div class="exercise-card">
+      <div id="esercizio"></div>
+    </div>
 
-  <div id="esercizio"></div>
+    <button class="solution-button" onclick="mostraSoluzione()">Mostra Soluzione</button>
 
-  <button onclick="mostraSoluzione()">Mostra soluzione</button>
-
-  <div id="soluzione"></div>
+    <div id="soluzione"></div>
+  </div>
 
   <script>
     let dati = {};
@@ -100,11 +312,10 @@
         <ul>
           <li>Il voto medio della popolazione è <strong>${mu}</strong>, con deviazione standard <strong>${sigma}</strong>.</li>
           <li>Un campione di <strong>${N}</strong> studenti ha ottenuto una media pari a <strong>${mediaCampione}</strong>.</li>
-          <li><strong>${H1descrizione}</strong></li>
+          <li><strong>${H1descrizione}</strong> (α = 0.05)</li>
         </ul>
       `;
 
-      document.getElementById("soluzione").style.display = "none";
       document.getElementById("soluzione").innerHTML = "";
     }
 
@@ -124,32 +335,64 @@
         commento = `Il campione ha una media ${rifiuto ? "<em>significativamente diversa</em>" : "<em>non significativamente diversa</em>"} rispetto alla popolazione.`;
       }
 
-      document.getElementById("soluzione").style.display = "block";
+      let decisioneText = "";
+      if (test === "maggiore") {
+        decisioneText = `Siccome Z = ${z} ${rifiuto ? ">" : "≤"} Z<sub>critico</sub> = ${Zcritico}`;
+      } else if (test === "minore") {
+        decisioneText = `Siccome Z = ${z} ${rifiuto ? "<" : "≥"} -Z<sub>critico</sub> = -${Zcritico}`;
+      } else {
+        decisioneText = `Siccome |Z| = ${Math.abs(z)} ${rifiuto ? ">" : "≤"} Z<sub>critico</sub> = ${Zcritico}`;
+      }
+
       document.getElementById("soluzione").innerHTML = `
-        <h2>Soluzione</h2>
-        <p><strong>Ipotesi nulla:</strong> H₀ : X̄ = μ</p>
-        <p><strong>Ipotesi alternativa:</strong> ${formula}</p>
-        <ul>
-          <li>X̄ = ${mediaCampione}</li>
-          <li>N = ${N}</li>
-          <li>μ = ${mu}</li>
-          <li>σ = ${sigma}</li>
-          <li>Z<sub>critico</sub> = ${Zcritico}</li>
-        </ul>
-        <p><strong>Calcolo dello Z:</strong></p>
-        <div class="formula">
-          Z = (${mediaCampione} − ${mu}) / (${sigma} / √${N}) = <strong>${z}</strong>
+        <div class="solution-card">
+          <h2>🔍 Soluzione Completa</h2>
+          
+          <div class="hypothesis">
+            <p><strong>Ipotesi nulla:</strong> H₀ : X̄ = μ (${mu})</p>
+            <p><strong>Ipotesi alternativa:</strong> ${formula}</p>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📊 Dati del Problema:</h3>
+          <ul>
+            <li><strong>Media campione (X̄):</strong> ${mediaCampione}</li>
+            <li><strong>Dimensione campione (N):</strong> ${N}</li>
+            <li><strong>Media popolazione (μ):</strong> ${mu}</li>
+            <li><strong>Deviazione standard popolazione (σ):</strong> ${sigma}</li>
+            <li><strong>Livello di significatività (α):</strong> 0.05</li>
+            <li><strong>Z<sub>critico</sub>:</strong> ${test === "bilaterale" ? "±" : ""}${Zcritico}</li>
+          </ul>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">🧮 Calcolo della Statistica Z:</h3>
+          <div class="formula">
+            <strong>Z = (X̄ - μ) / (σ / √N)</strong><br><br>
+            Z = (${mediaCampione} - ${mu}) / (${sigma} / √${N})<br>
+            Z = ${(mediaCampione - mu).toFixed(2)} / ${se.toFixed(3)}<br>
+            <strong>Z = ${z}</strong>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">⚖️ Decisione Statistica:</h3>
+          <div class="decision-box ${rifiuto ? 'reject' : ''}">
+            <p>${decisioneText}, <strong>${rifiuto ? "rifiutiamo" : "non rifiutiamo"} H₀</strong>.</p>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">💭 Interpretazione:</h3>
+          <div class="comment-box">
+            <p>${commento}</p>
+            <p style="margin-top: 10px; font-size: 0.95em;">
+              Con un livello di significatività del 5%, ${rifiuto ? "abbiamo prove sufficienti per" : "non abbiamo prove sufficienti per"} 
+              ${test === "maggiore" ? "concludere che la media del campione è maggiore" : 
+                test === "minore" ? "concludere che la media del campione è minore" : 
+                "concludere che la media del campione è diversa"} dalla media della popolazione.
+            </p>
+          </div>
+
+          <button class="new-exercise-button" onclick="generaDati()">🔄 Genera Nuovo Esercizio</button>
         </div>
-        <p><strong>Decisione:</strong><br>
-        Siccome Z = ${z} ${rifiuto ? (test === "minore" ? "<" : ">") : "non supera"} Z<sub>critico</sub> = ${Zcritico}, <strong>${rifiuto ? "rifiutiamo" : "non rifiutiamo"} H₀</strong>.</p>
-        <p><strong>Commento:</strong><br>${commento}</p>
-        <br>
-        <button onclick="generaDati()">Genera un nuovo esercizio</button>
       `;
     }
 
     window.onload = generaDati;
   </script>
-
 </body>
 </html>
