@@ -344,7 +344,7 @@
         const d = Math.max(1, Math.min(7, base + variazione)); // mantieni tra 1 e 7
         prima.push(p);
         dopo.push(d);
-        differenze.push(d - p);
+        differenze.push(d - p); // Dopo - Prima (corretto)
       }
 
       const mediaD = jStat.mean(differenze);
@@ -409,10 +409,10 @@
     function mostraSoluzione() {
       const { tipo, prima, dopo, differenze, mediaD, stdD, se, t, df, tCritico, decisione, simbolo } = dati;
 
-      let H0 = "H₀: μD = 0 (nessuna differenza media)";
-      let H1 = tipo === "destra" ? "H₁: μD > 0 (miglioramento)" :
-               tipo === "sinistra" ? "H₁: μD < 0 (peggioramento)" :
-               "H₁: μD ≠ 0 (differenza significativa)";
+      let H0 = "H₀: μD = 0 (nessuna differenza media tra dopo e prima)";
+      let H1 = tipo === "destra" ? "H₁: μD > 0 (dopo > prima, miglioramento)" :
+               tipo === "sinistra" ? "H₁: μD < 0 (dopo < prima, peggioramento)" :
+               "H₁: μD ≠ 0 (differenza significativa tra dopo e prima)";
 
       // Crea tabella delle differenze
       let differenzeTable = `
@@ -463,6 +463,9 @@
           <div class="hypothesis">
             <p><strong>Ipotesi nulla:</strong> ${H0}</p>
             <p><strong>Ipotesi alternativa:</strong> ${H1}</p>
+            <p style="font-size: 0.9em; color: #6c757d; margin-top: 10px;">
+              <strong>Nota:</strong> D = Dopo - Prima (differenze positive indicano miglioramento)
+            </p>
           </div>
 
           <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📋 Calcolo delle Differenze:</h3>
@@ -475,7 +478,7 @@
               ${mediaD.toFixed(3)}
             </div>
             <div class="stat-box">
-              <strong>Deviazione Standard (s^2D)</strong><br>
+              <strong>Deviazione Standard (sD)</strong><br>
               ${stdD.toFixed(3)}
             </div>
             <div class="stat-box">
@@ -490,7 +493,7 @@
 
           <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">🧮 Calcolo della Statistica t:</h3>
           <div class="formula">
-            <strong>t = D̄ / (s^2D / √n)</strong><br><br>
+            <strong>t = D̄ / (sD / √n)</strong><br><br>
             t = ${mediaD.toFixed(3)} / (${stdD.toFixed(3)} / √${prima.length})<br>
             t = ${mediaD.toFixed(3)} / ${se.toFixed(3)}<br>
             <strong>t = ${t.toFixed(3)}</strong>
