@@ -245,14 +245,16 @@
     .differences-table th {
       background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
       color: white;
-      padding: 12px;
+      padding: 12px 8px;
       font-weight: 600;
+      font-size: 0.95em;
     }
 
     .differences-table td {
-      padding: 10px 12px;
+      padding: 10px 8px;
       text-align: center;
       border-bottom: 1px solid #e9ecef;
+      font-size: 0.95em;
     }
 
     .differences-table tr:nth-child(even) {
@@ -414,31 +416,61 @@
                tipo === "sinistra" ? "H₁: μD < 0 (dopo < prima, peggioramento)" :
                "H₁: μD ≠ 0 (differenza significativa tra dopo e prima)";
 
-      // Crea tabella delle differenze
+      // Crea tabella delle differenze arricchita
       let differenzeTable = `
         <table class="differences-table">
           <tr>
             <th>Soggetto</th>
             <th>Prima</th>
             <th>Dopo</th>
-            <th>Differenza (D = Dopo - Prima)</th>
+            <th>D = Dopo - Prima</th>
+            <th>D - D̄</th>
+            <th>(D - D̄)²</th>
           </tr>
       `;
       
       for (let i = 0; i < prima.length; i++) {
         const diff = differenze[i];
+        const diffFromMean = diff - mediaD;
+        const diffSquared = Math.pow(diffFromMean, 2);
+        
         const diffColor = diff > 0 ? 'color: #28a745; font-weight: bold;' : 
                          diff < 0 ? 'color: #dc3545; font-weight: bold;' : 
                          'color: #6c757d;';
+        
+        const diffFromMeanColor = Math.abs(diffFromMean) > 0.01 ? 'font-weight: 500;' : 'color: #6c757d;';
+        
         differenzeTable += `
           <tr>
             <td><strong>${i + 1}</strong></td>
             <td>${prima[i]}</td>
             <td>${dopo[i]}</td>
             <td style="${diffColor}">${diff > 0 ? '+' : ''}${diff}</td>
+            <td style="${diffFromMeanColor}">${diffFromMean.toFixed(2)}</td>
+            <td>${diffSquared.toFixed(2)}</td>
           </tr>
         `;
       }
+      
+      // Aggiungi riga dei totali
+      const sumDiffSquared = differenze.reduce((sum, d) => sum + Math.pow(d - mediaD, 2), 0);
+      const variance = sumDiffSquared / (prima.length - 1);
+      
+      differenzeTable += `
+        <tr style="background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%); font-weight: bold;">
+          <td colspan="3" style="text-align: right; padding-right: 20px;">
+            <strong>D̄ = ${mediaD.toFixed(2)}</strong>
+          </td>
+          <td style="color: #495057;"><strong>Σ =</strong></td>
+          <td style="color: #495057;"><strong>${sumDiffSquared.toFixed(2)}</strong></td>
+        </tr>
+        <tr style="background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%); font-weight: bold;">
+          <td colspan="4" style="text-align: right; padding-right: 20px;">
+            <strong>Σ/(N-1) = s²D = ${sumDiffSquared.toFixed(2)}/${prima.length-1} = ${variance.toFixed(2)}</strong>
+          </td>
+          <td style="color: #0c5460;"><strong>sD = ${stdD.toFixed(3)}</strong></td>
+        </tr>
+      `;
       differenzeTable += `</table>`;
 
       let decisioneText = "";
@@ -468,7 +500,7 @@
             </p>
           </div>
 
-          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📋 Calcolo delle Differenze:</h3>
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📋 Calcolo Dettagliato delle Differenze:</h3>
           ${differenzeTable}
 
           <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📊 Statistiche delle Differenze:</h3>
