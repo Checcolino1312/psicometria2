@@ -327,7 +327,15 @@
 
       const se = s / Math.sqrt(N);
       const t = ((xBar - mu) / se).toFixed(3);
-      const rifiuto = decisioneFunz(parseFloat(t), Math.abs(tCritico));
+      let tValue = parseFloat(t);
+let rifiuto;
+
+if (tipo === "bilaterale") {
+  rifiuto = decisioneFunz(Math.abs(tValue), Math.abs(tCritico));
+} else {
+  rifiuto = decisioneFunz(tValue, tCritico);
+}
+
       
       let tCritView;
       let decisioneText;
