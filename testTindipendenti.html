@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test t per Campioni Indipendenti (Welch)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #fecfef 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #ff9a9e;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1.1em;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .exercise-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border-left: 5px solid #ff9a9e;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .exercise-description {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border-radius: 10px;
+      border-left: 4px solid #ffc107;
+      font-weight: 600;
+    }
+
+    .data-table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .data-table th {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      color: #2c3e50;
+      padding: 15px;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .data-table td {
+      padding: 15px;
+      text-align: center;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 1.1em;
+      font-weight: 500;
+    }
+
+    .data-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .data-table tr:hover {
+      background-color: #ffe6e6;
+      transition: background-color 0.3s ease;
+    }
+
+    .group-1-row {
+      border-left: 4px solid #28a745;
+    }
+
+    .group-2-row {
+      border-left: 4px solid #dc3545;
+    }
+
+    .solution-button {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+      margin: 20px auto;
+      display: block;
+    }
+
+    .solution-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+    }
+
+    .solution-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 30px;
+      border-top: 5px solid #28a745;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .solution-card h2 {
+      color: #2c3e50;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .hypothesis {
+      background: rgba(108, 117, 125, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #6c757d;
+    }
+
+    .calculations-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .calc-box {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid #17a2b8;
+      text-align: center;
+    }
+
+    .calc-box strong {
+      color: #2c3e50;
+      font-size: 1.1em;
+    }
+
+    .formula {
+      font-family: "Courier New", monospace;
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 1.1em;
+      border: 2px solid #2196f3;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(33, 150, 243, 0.1);
+    }
+
+    .welch-formula {
+      background: linear-gradient(135deg, #fff3e0 0%, #ffcc80 100%);
+      border-color: #ff9800;
+      font-size: 0.95em;
+    }
+
+    .decision-box {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      border: 2px solid #28a745;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    .decision-box.reject {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      border-color: #dc3545;
+    }
+
+    .interpretation-box {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      font-style: italic;
+      font-size: 1.1em;
+    }
+
+    .groups-comparison {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+
+    .group-info {
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .group-1 {
+      border-left: 5px solid #28a745;
+    }
+
+    .group-2 {
+      border-left: 5px solid #dc3545;
+    }
+
+    .new-exercise-button {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+      margin: 20px auto;
+      display: block;
+    }
+
+    .new-exercise-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .back-button {
+        position: static;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .exercise-card, .solution-card {
+        padding: 20px;
+      }
+
+      .groups-comparison {
+        grid-template-columns: 1fr;
+      }
+
+      .calculations-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-button">← Torna al Menu</a>
+
+  <div class="container">
+    <div class="header">
+      <h1>Test t per Campioni Indipendenti</h1>
+      <p class="subtitle">Test di Welch - Confronto tra Due Gruppi Indipendenti</p>
+    </div>
+
+    <div class="exercise-card">
+      <div id="esercizio"></div>
+    </div>
+
+    <button class="solution-button" onclick="mostraSoluzione()">Mostra Soluzione Dettagliata</button>
+
+    <div id="soluzione"></div>
+  </div>
+
+  <script>
+    let dati = {};
+
+    function generaEsercizio() {
+      const n1 = Math.floor(Math.random() * 4) + 10; // 10-13
+      const n2 = Math.floor(Math.random() * 4) + 10;
+
+      const media1 = +(Math.random() * 4 + 6).toFixed(2); // 6–10
+      const media2 = +(media1 + (Math.random() * 4 - 2)).toFixed(2); // diff ±2
+      const var1 = +(Math.random() * 3 + 2).toFixed(2);   // 2–5
+      const var2 = +(Math.random() * 3 + 2).toFixed(2);
+
+      const se1 = Math.sqrt(var1 / n1);
+      const se2 = Math.sqrt(var2 / n2);
+      const t = (media1 - media2) / Math.sqrt(se1 ** 2 + se2 ** 2);
+
+      const df = Math.pow(se1 ** 2 + se2 ** 2, 2) /
+                 ((Math.pow(se1, 4) / (n1 - 1)) + (Math.pow(se2, 4) / (n2 - 1)));
+
+      const tipiTest = ["destra", "sinistra", "bilaterale"];
+      const tipo = tipiTest[Math.floor(Math.random() * 3)];
+
+      let tCrit, simbolo, decisione;
+      if (tipo === "destra") {
+        tCrit = jStat.studentt.inv(1 - 0.05, df);
+        simbolo = ">";
+        decisione = t > tCrit;
+      } else if (tipo === "sinistra") {
+        tCrit = jStat.studentt.inv(0.05, df);
+        simbolo = "<";
+        decisione = t < tCrit;
+      } else {
+        tCrit = jStat.studentt.inv(1 - 0.025, df);
+        simbolo = "|t| >";
+        decisione = Math.abs(t) > tCrit;
+      }
+
+      dati = { n1, n2, media1, media2, var1, var2, se1, se2, t, df, tipo, tCrit, simbolo, decisione };
+      mostraEsercizio();
+    }
+
+    function mostraEsercizio() {
+      const { n1, n2, media1, media2, var1, var2, tipo } = dati;
+      
+      let descrizione;
+      if (tipo === "destra") descrizione = "Verificare se il <strong>Gruppo 1</strong> ha una media significativamente <strong>maggiore</strong> del Gruppo 2 (α = 0.05).";
+      else if (tipo === "sinistra") descrizione = "Verificare se il <strong>Gruppo 1</strong> ha una media significativamente <strong>minore</strong> del Gruppo 2 (α = 0.05).";
+      else descrizione = "Verificare se i due gruppi hanno medie significativamente <strong>diverse</strong> (α = 0.05).";
+
+      let html = `
+        <div class="exercise-description">
+          🔬 ${descrizione}
+        </div>
+        <p style="margin-bottom: 20px; font-size: 1.1em; color: #6c757d;">
+          <strong>Scenario:</strong> Due gruppi indipendenti di partecipanti sono stati confrontati su una variabile continua. Utilizzare il test di Welch per l'analisi.
+        </p>
+        
+        <table class="data-table">
+          <tr>
+            <th>👥 Gruppo</th>
+            <th>📊 N (Dimensione)</th>
+            <th>📈 Media (X̄)</th>
+            <th>📉 Varianza (s²)</th>
+          </tr>
+          <tr class="group-1-row">
+            <td><strong>🟢 Gruppo 1</strong></td>
+            <td>${n1}</td>
+            <td>${media1}</td>
+            <td>${var1}</td>
+          </tr>
+          <tr class="group-2-row">
+            <td><strong>🔴 Gruppo 2</strong></td>
+            <td>${n2}</td>
+            <td>${media2}</td>
+            <td>${var2}</td>
+          </tr>
+        </table>
+      `;
+      
+      document.getElementById("esercizio").innerHTML = html;
+      document.getElementById("soluzione").innerHTML = "";
+    }
+
+    function mostraSoluzione() {
+      const { media1, media2, var1, var2, n1, n2, se1, se2, t, df, tipo, tCrit, simbolo, decisione } = dati;
+      
+      const tFix = t.toFixed(3);
+      const dfFix = Math.round(df);
+      const tCritFix = Math.abs(tCrit).toFixed(3);
+      const confronto = simbolo === "|t| >" ? `|t| = ${Math.abs(tFix)}` : `t = ${tFix}`;
+
+      let H1;
+      if (tipo === "destra") H1 = "H₁: μ₁ > μ₂";
+      else if (tipo === "sinistra") H1 = "H₁: μ₁ < μ₂";
+      else H1 = "H₁: μ₁ ≠ μ₂";
+
+      let decisioneText = "";
+      if (tipo === "destra") {
+        decisioneText = `Siccome t = ${tFix} ${decisione ? ">" : "≤"} t<sub>critico</sub> = ${tCritFix}`;
+      } else if (tipo === "sinistra") {
+        decisioneText = `Siccome t = ${tFix} ${decisione ? "<" : "≥"} t<sub>critico</sub> = ${tCritFix}`;
+      } else {
+        decisioneText = `Siccome |t| = ${Math.abs(tFix)} ${decisione ? ">" : "≤"} t<sub>critico</sub> = ${tCritFix}`;
+      }
+
+      let interpretazione;
+      if (tipo === "destra") {
+        interpretazione = decisione ? 
+          "🎉 Il <strong>Gruppo 1</strong> ha una media significativamente <strong>maggiore</strong> del Gruppo 2." :
+          "📊 Non ci sono prove sufficienti che il Gruppo 1 abbia una media maggiore del Gruppo 2.";
+      } else if (tipo === "sinistra") {
+        interpretazione = decisione ?
+          "📉 Il <strong>Gruppo 1</strong> ha una media significativamente <strong>minore</strong> del Gruppo 2." :
+          "📊 Non ci sono prove sufficienti che il Gruppo 1 abbia una media minore del Gruppo 2.";
+      } else {
+        interpretazione = decisione ?
+          "🔄 I due gruppi hanno medie <strong>significativamente diverse</strong>." :
+          "📊 Non ci sono prove sufficienti di una differenza significativa tra i gruppi.";
+      }
+
+      let html = `
+        <div class="solution-card">
+          <h2>🔍 Soluzione Completa - Test di Welch</h2>
+          
+          <div class="hypothesis">
+            <p><strong>Ipotesi nulla:</strong> H₀: μ₁ = μ₂ (nessuna differenza tra le medie)</p>
+            <p><strong>Ipotesi alternativa:</strong> ${H1}</p>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📊 Confronto tra i Gruppi:</h3>
+          <div class="groups-comparison">
+            <div class="group-info group-1">
+              <h4 style="color: #28a745; margin-bottom: 10px;">🟢 Gruppo 1</h4>
+              <p><strong>N:</strong> ${n1}</p>
+              <p><strong>Media:</strong> ${media1}</p>
+              <p><strong>Varianza:</strong> ${var1}</p>
+              <p><strong>Errore Standard:</strong> ${se1.toFixed(3)}</p>
+            </div>
+            <div class="group-info group-2">
+              <h4 style="color: #dc3545; margin-bottom: 10px;">🔴 Gruppo 2</h4>
+              <p><strong>N:</strong> ${n2}</p>
+              <p><strong>Media:</strong> ${media2}</p>
+              <p><strong>Varianza:</strong> ${var2}</p>
+              <p><strong>Errore Standard:</strong> ${se2.toFixed(3)}</p>
+            </div>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">🧮 Calcoli del Test di Welch:</h3>
+          <div class="calculations-grid">
+            <div class="calc-box">
+              <strong>Differenza Medie</strong><br>
+              ${media1} - ${media2} = ${(media1 - media2).toFixed(3)}
+            </div>
+            <div class="calc-box">
+              <strong>Errore Standard Pooled</strong><br>
+              √(${se1.toFixed(3)}² + ${se2.toFixed(3)}²) = ${Math.sqrt(se1**2 + se2**2).toFixed(3)}
+            </div>
+            <div class="calc-box">
+              <strong>Statistica t</strong><br>
+              ${tFix}
+            </div>
+            <div class="calc-box">
+              <strong>Gradi di Libertà (Welch)</strong><br>
+              ${dfFix}
+            </div>
+          </div>
+
+          <div class="formula">
+            <strong>Formula del Test t di Welch:</strong><br><br>
+            t = (X̄₁ - X̄₂) / √(s₁²/n₁ + s₂²/n₂)<br>
+            t = (${media1} - ${media2}) / √(${var1}/${n1} + ${var2}/${n2})<br>
+            <strong>t = ${tFix}</strong>
+          </div>
+
+          <div class="welch-formula">
+            <strong>Gradi di Libertà di Welch:</strong><br>
+            df = (s₁²/n₁ + s₂²/n₂)² / [(s₁²/n₁)²/(n₁-1) + (s₂²/n₂)²/(n₂-1)]<br>
+            <strong>df ≈ ${dfFix}</strong>
+          </div>
+
+          <div class="calc-box" style="margin: 20px 0; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+            <strong>Valore Critico: t<sub>critico</sub> = ${tipo === "bilaterale" ? "±" : ""}${tCritFix}</strong>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">⚖️ Decisione Statistica:</h3>
+          <div class="decision-box ${decisione ? 'reject' : ''}">
+            <p>${decisioneText}, <strong>${decisione ? "rifiutiamo" : "non rifiutiamo"} H₀</strong>.</p>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">💭 Interpretazione:</h3>
+          <div class="interpretation-box">
+            <p>${interpretazione}</p>
+            <p style="margin-top: 10px; font-size: 0.95em;">
+              Con un livello di significatività del 5% e ${dfFix} gradi di libertà (correzione di Welch), 
+              ${decisione ? "abbiamo prove statistiche sufficienti" : "non abbiamo prove statistiche sufficienti"} 
+              per concludere che esiste una differenza significativa tra i due gruppi.
+            </p>
+          </div>
+
+          <button class="new-exercise-button" onclick="generaEsercizio()">🔄 Genera Nuovo Esercizio</button>
+        </div>
+      `;
+      document.getElementById("soluzione").innerHTML = html;
+    }
+
+    window.onload = generaEsercizio;
+  </script>
+</body>
+</html>

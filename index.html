@@ -52,7 +52,7 @@
       grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
       gap: 25px;
       justify-content: center;
-      max-width: 900px;
+      max-width: 1200px;
       margin: 0 auto;
     }
 
@@ -111,6 +111,30 @@
       background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
       color: #2c3e50;
       box-shadow: 0 8px 20px rgba(168, 237, 234, 0.3);
+    }
+
+    .test-t:hover {
+      box-shadow: 0 12px 30px rgba(168, 237, 234, 0.4);
+    }
+
+    .test-paired {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .test-paired:hover {
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .test-independent {
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+      color: #2c3e50;
+      box-shadow: 0 8px 20px rgba(255, 154, 158, 0.3);
+    }
+
+    .test-independent:hover {
+      box-shadow: 0 12px 30px rgba(255, 154, 158, 0.4);
+    }20px rgba(168, 237, 234, 0.3);
     }
 
     .test-t:hover {
@@ -190,6 +214,12 @@
         <small>Dati Prima-Dopo</small><br>
         <small style="font-size: 0.8em; opacity: 0.8;">Campioni dipendenti</small>
       </a>
+
+      <a href="testTindipendenti.html" class="test-button test-independent">
+        <strong>⚖️ Test t Indipendenti</strong><br>
+        <small>Test di Welch</small><br>
+        <small style="font-size: 0.8em; opacity: 0.8;">Due gruppi separati</small>
+      </a>
     </div>
 
     <div class="description">
@@ -197,7 +227,8 @@
       <p>
         <strong>📊 Test Z:</strong> Utilizzato quando la deviazione standard della popolazione è nota e la dimensione del campione è grande (N > 30). Utilizza la distribuzione normale standard.<br><br>
         <strong>📈 Test t:</strong> Utilizzato quando la deviazione standard della popolazione non è nota e viene stimata dal campione. Utilizza la distribuzione t-Student con gradi di libertà = N-1.<br><br>
-        <strong>🔗 Test t per Dati Appaiati:</strong> Utilizzato per confrontare le misurazioni dello stesso gruppo di soggetti in due momenti diversi (prima/dopo, pre/post trattamento). Analizza le differenze all'interno di ogni soggetto.
+        <strong>🔗 Test t per Dati Appaiati:</strong> Utilizzato per confrontare le misurazioni dello stesso gruppo di soggetti in due momenti diversi (prima/dopo, pre/post trattamento). Analizza le differenze all'interno di ogni soggetto.<br><br>
+        <strong>⚖️ Test t per Campioni Indipendenti (Welch):</strong> Utilizzato per confrontare le medie di due gruppi completamente separati e indipendenti. Non assume varianze uguali tra i gruppi (più robusto del test t classico).
       </p>
     </div>
   </div>
