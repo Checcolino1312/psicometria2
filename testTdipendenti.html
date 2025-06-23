@@ -475,7 +475,7 @@
               ${mediaD.toFixed(3)}
             </div>
             <div class="stat-box">
-              <strong>Deviazione Standard (sD)</strong><br>
+              <strong>Deviazione Standard (s^2D)</strong><br>
               ${stdD.toFixed(3)}
             </div>
             <div class="stat-box">
@@ -490,7 +490,7 @@
 
           <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">🧮 Calcolo della Statistica t:</h3>
           <div class="formula">
-            <strong>t = D̄ / (sD / √n)</strong><br><br>
+            <strong>t = D̄ / (s^2D / √n)</strong><br><br>
             t = ${mediaD.toFixed(3)} / (${stdD.toFixed(3)} / √${prima.length})<br>
             t = ${mediaD.toFixed(3)} / ${se.toFixed(3)}<br>
             <strong>t = ${t.toFixed(3)}</strong>
