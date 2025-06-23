@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Test t (Student)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
+  <style>
+    body {
+      background-color: #d3fdd3;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+    }
+    ul, p {
+      font-size: 18px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #esercizio, #soluzione {
+      margin-top: 20px;
+    }
+    #soluzione {
+      display: none;
+      border-top: 2px solid #aaa;
+      padding-top: 20px;
+    }
+    .formula {
+      font-family: "Courier New", monospace;
+      background: #eef;
+      padding: 10px;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+
+  <div id="esercizio"></div>
+
+  <button onclick="mostraSoluzione()">Mostra soluzione</button>
+
+  <div id="soluzione"></div>
+
+  <script>
+    let dati = {};
+
+    function generaDati() {
+      const N = Math.floor(Math.random() * 101) + 50;        // 50–150
+      const df = N - 1;
+      const s = Math.floor(Math.random() * 2) + 2;            // 2–3
+      const mu = Math.floor(Math.random() * 3) + 26;          // 26–28
+
+      const tipiTest = ["sinistra", "destra", "bilaterale"];
+      const tipo = tipiTest[Math.floor(Math.random() * tipiTest.length)];
+
+      let xBar;
+      if (tipo === "sinistra") xBar = (mu - Math.random() * 1.2).toFixed(2);
+      else if (tipo === "destra") xBar = (mu + Math.random() * 1.2).toFixed(2);
+      else xBar = (mu + (Math.random() * 1.2 - 0.6)).toFixed(2); // può essere maggiore o minore
+
+      const alpha = 0.05;
+      let tCritico, descrizione, H1, decisioneFunz;
+
+      if (tipo === "sinistra") {
+        tCritico = -jStat.studentt.inv(1 - alpha, df);
+        descrizione = "Verificare, con α = 0.05, che la media del campione sia <strong>minore</strong> della media della popolazione.";
+        H1 = "H₁ : X̄ < μ";
+        decisioneFunz = (t, tc) => t < tc;
+      } else if (tipo === "destra") {
+        tCritico = jStat.studentt.inv(1 - alpha, df);
+        descrizione = "Verificare, con α = 0.05, che la media del campione sia <strong>maggiore</strong> della media della popolazione.";
+        H1 = "H₁ : X̄ > μ";
+        decisioneFunz = (t, tc) => t > tc;
+      } else {
+        tCritico = jStat.studentt.inv(1 - alpha / 2, df);
+        descrizione = "Verificare, con α = 0.05, che la media del campione sia <strong>diversa</strong> dalla media della popolazione.";
+        H1 = "H₁ : X̄ ≠ μ";
+        decisioneFunz = (t, tc) => Math.abs(t) > tc;
+      }
+
+      dati = { N, df, s, mu, xBar, alpha, tCritico, descrizione, H1, decisioneFunz, tipo };
+
+      document.getElementById("esercizio").innerHTML = `
+        <ul>
+          <li>Un gruppo di studenti (N = ${N}) ha ottenuto una media al test pari a <strong>${xBar}</strong> (s = ${s}).<br>
+              La media della popolazione è <strong>${mu}</strong>.</li>
+          <li>${descrizione}</li>
+        </ul>
+      `;
+
+      document.getElementById("soluzione").style.display = "none";
+      document.getElementById("soluzione").innerHTML = "";
+    }
+
+    function mostraSoluzione() {
+      const { N, df, s, mu, xBar, tCritico, H1, decisioneFunz, tipo } = dati;
+
+      const se = s / Math.sqrt(N);
+      const t = ((xBar - mu) / se).toFixed(2);
+      const rifiuto = decisioneFunz(t, tCritico);
+      const simbolo = tipo === "bilaterale" ? "|" : (tipo === "sinistra" ? "<" : ">");
+      const tCritView = tipo === "bilaterale" ? `±${tCritico.toFixed(2)}` : tCritico.toFixed(2);
+
+      let commento;
+      if (tipo === "sinistra") {
+        commento = `Il campione ha una media ${rifiuto ? "<em>significativamente minore</em>" : "<em>non significativamente minore</em>"} rispetto alla popolazione.`;
+      } else if (tipo === "destra") {
+        commento = `Il campione ha una media ${rifiuto ? "<em>significativamente maggiore</em>" : "<em>non significativamente maggiore</em>"} rispetto alla popolazione.`;
+      } else {
+        commento = `Il campione ha una media ${rifiuto ? "<em>significativamente diversa</em>" : "<em>non significativamente diversa</em>"} rispetto alla popolazione.`;
+      }
+
+      document.getElementById("soluzione").style.display = "block";
+      document.getElementById("soluzione").innerHTML = `
+        <h2>Soluzione</h2>
+        <p><strong>Ipotesi nulla:</strong> H₀ : X̄ = μ</p>
+        <p><strong>Ipotesi alternativa:</strong> ${H1}</p>
+        <ul>
+          <li>X̄ = ${xBar}</li>
+          <li>N = ${N}</li>
+          <li>μ = ${mu}</li>
+          <li>s = ${s}</li>
+          <li>gradi di libertà (df) = ${df}</li>
+          <li>t<sub>critico</sub> = ${tCritView}</li>
+        </ul>
+        <p><strong>Calcolo del t:</strong></p>
+        <div class="formula">
+          t = (X̄ − μ) / (s / √N) = (${xBar} − ${mu}) / (${s} / √${N}) = <strong>${t}</strong>
+        </div>
+        <p><strong>Decisione:</strong><br>
+        Siccome ${tipo === "bilaterale" ? "|t|" : "t"} = ${tipo === "bilaterale" ? Math.abs(t) : t} ${simbolo} ${tCritView}, 
+        <strong>${rifiuto ? "rifiutiamo" : "non rifiutiamo"} H₀</strong>.</p>
+        <p><strong>Commento:</strong><br>${commento}</p>
+        <br>
+        <button onclick="generaDati()">Genera un nuovo esercizio</button>
+      `;
+    }
+
+    window.onload = generaDati;
+  </script>
+
+</body>
+</html>

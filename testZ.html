@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Test Z casuale</title>
+  <style>
+    body {
+      background-color: #f4f8e3;
+      font-family: Arial, sans-serif;
+      padding: 30px;
+    }
+    h1 {
+      text-align: center;
+    }
+    ul, p {
+      font-size: 18px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #esercizio, #soluzione {
+      margin-top: 20px;
+    }
+    #soluzione {
+      display: none;
+      border-top: 2px solid #aaa;
+      padding-top: 20px;
+    }
+    .formula {
+      font-family: "Courier New", monospace;
+      background: #eef;
+      padding: 10px;
+      border-radius: 5px;
+      display: inline-block;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+
+
+  <div id="esercizio"></div>
+
+  <button onclick="mostraSoluzione()">Mostra soluzione</button>
+
+  <div id="soluzione"></div>
+
+  <script>
+    let dati = {};
+
+    function generaDati() {
+      const mu = Math.floor(Math.random() * 4) + 24;       // 24 - 27
+      const sigma = Math.floor(Math.random() * 3) + 2;      // 2 - 4
+      const N = Math.floor(Math.random() * 101) + 200;      // 200 - 300
+
+      const testType = ["maggiore", "minore", "diversa"];
+      const scelta = testType[Math.floor(Math.random() * 3)];
+
+      let mediaCampione;
+      let H1descrizione, H1formula, Zcritico, decisioneTest;
+
+      if (scelta === "maggiore") {
+        mediaCampione = (mu + Math.random() * 1.5).toFixed(2);
+        H1descrizione = "Verificare se la media del campione è significativamente maggiore della media della popolazione.";
+        H1formula = "H₁: X̄ > μ";
+        decisioneTest = (z, zcrit) => z > zcrit;
+        Zcritico = 1.64;
+      } else if (scelta === "minore") {
+        mediaCampione = (mu - Math.random() * 1.5).toFixed(2);
+        H1descrizione = "Verificare se la media del campione è significativamente minore della media della popolazione.";
+        H1formula = "H₁: X̄ < μ";
+        decisioneTest = (z, zcrit) => z < -zcrit;
+        Zcritico = 1.64;
+      } else {
+        const delta = (Math.random() * 1.5 + 0.3) * (Math.random() < 0.5 ? -1 : 1);
+        mediaCampione = (mu + delta).toFixed(2);
+        H1descrizione = "Verificare se la media del campione è significativamente diversa dalla media della popolazione.";
+        H1formula = "H₁: X̄ ≠ μ";
+        decisioneTest = (z, zcrit) => Math.abs(z) > zcrit;
+        Zcritico = 1.96;
+      }
+
+      dati = {
+        mu,
+        sigma,
+        N,
+        mediaCampione,
+        test: scelta,
+        descrizione: H1descrizione,
+        formula: H1formula,
+        Zcritico,
+        decisioneTest
+      };
+
+      document.getElementById("esercizio").innerHTML = `
+        <ul>
+          <li>Il voto medio della popolazione è <strong>${mu}</strong>, con deviazione standard <strong>${sigma}</strong>.</li>
+          <li>Un campione di <strong>${N}</strong> studenti ha ottenuto una media pari a <strong>${mediaCampione}</strong>.</li>
+          <li><strong>${H1descrizione}</strong></li>
+        </ul>
+      `;
+
+      document.getElementById("soluzione").style.display = "none";
+      document.getElementById("soluzione").innerHTML = "";
+    }
+
+    function mostraSoluzione() {
+      const { mu, sigma, N, mediaCampione, formula, Zcritico, decisioneTest, descrizione, test } = dati;
+
+      const se = sigma / Math.sqrt(N);
+      const z = ((mediaCampione - mu) / se).toFixed(2);
+      const rifiuto = decisioneTest(z, Zcritico);
+
+      let commento;
+      if (test === "maggiore") {
+        commento = `Il campione ha una media ${rifiuto ? "<em>significativamente maggiore</em>" : "<em>non significativamente maggiore</em>"} rispetto alla popolazione.`;
+      } else if (test === "minore") {
+        commento = `Il campione ha una media ${rifiuto ? "<em>significativamente minore</em>" : "<em>non significativamente minore</em>"} rispetto alla popolazione.`;
+      } else {
+        commento = `Il campione ha una media ${rifiuto ? "<em>significativamente diversa</em>" : "<em>non significativamente diversa</em>"} rispetto alla popolazione.`;
+      }
+
+      document.getElementById("soluzione").style.display = "block";
+      document.getElementById("soluzione").innerHTML = `
+        <h2>Soluzione</h2>
+        <p><strong>Ipotesi nulla:</strong> H₀ : X̄ = μ</p>
+        <p><strong>Ipotesi alternativa:</strong> ${formula}</p>
+        <ul>
+          <li>X̄ = ${mediaCampione}</li>
+          <li>N = ${N}</li>
+          <li>μ = ${mu}</li>
+          <li>σ = ${sigma}</li>
+          <li>Z<sub>critico</sub> = ${Zcritico}</li>
+        </ul>
+        <p><strong>Calcolo dello Z:</strong></p>
+        <div class="formula">
+          Z = (${mediaCampione} − ${mu}) / (${sigma} / √${N}) = <strong>${z}</strong>
+        </div>
+        <p><strong>Decisione:</strong><br>
+        Siccome Z = ${z} ${rifiuto ? (test === "minore" ? "<" : ">") : "non supera"} Z<sub>critico</sub> = ${Zcritico}, <strong>${rifiuto ? "rifiutiamo" : "non rifiutiamo"} H₀</strong>.</p>
+        <p><strong>Commento:</strong><br>${commento}</p>
+        <br>
+        <button onclick="generaDati()">Genera un nuovo esercizio</button>
+      `;
+    }
+
+    window.onload = generaDati;
+  </script>
+
+</body>
+</html>
