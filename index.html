@@ -48,28 +48,30 @@
     }
 
     .buttons-container {
-      display: flex;
-      gap: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
       justify-content: center;
-      flex-wrap: wrap;
+      max-width: 900px;
+      margin: 0 auto;
     }
 
     .test-button {
       background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
       color: white;
       border: none;
-      padding: 20px 40px;
-      font-size: 1.3em;
+      padding: 25px 30px;
+      font-size: 1.2em;
       font-weight: 600;
       border-radius: 15px;
       cursor: pointer;
       transition: all 0.3s ease;
       box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
       text-decoration: none;
-      display: inline-block;
+      display: block;
       position: relative;
       overflow: hidden;
-      min-width: 200px;
+      text-align: center;
     }
 
     .test-button:hover {
@@ -115,6 +117,15 @@
       box-shadow: 0 12px 30px rgba(168, 237, 234, 0.4);
     }
 
+    .test-paired {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    }
+
+    .test-paired:hover {
+      box-shadow: 0 12px 30px rgba(102, 126, 234, 0.4);
+    }
+
     .description {
       margin-top: 40px;
       padding: 20px;
@@ -145,13 +156,13 @@
       }
 
       .buttons-container {
-        flex-direction: column;
+        grid-template-columns: 1fr;
         gap: 20px;
       }
 
       .test-button {
-        min-width: auto;
         width: 100%;
+        padding: 20px;
       }
     }
   </style>
@@ -163,21 +174,30 @@
     
     <div class="buttons-container">
       <a href="testZ.html" class="test-button test-z">
-        <strong>Test Z</strong><br>
-        <small>Distribuzione Normale</small>
+        <strong>📊 Test Z</strong><br>
+        <small>Distribuzione Normale</small><br>
+        <small style="font-size: 0.8em; opacity: 0.8;">σ popolazione nota</small>
       </a>
       
       <a href="testT.html" class="test-button test-t">
-        <strong>Test t</strong><br>
-        <small>Distribuzione t-Student</small>
+        <strong>📈 Test t</strong><br>
+        <small>Distribuzione t-Student</small><br>
+        <small style="font-size: 0.8em; opacity: 0.8;">σ popolazione ignota</small>
+      </a>
+
+      <a href="testTdipendenti.html" class="test-button test-paired">
+        <strong>🔗 Test t Appaiati</strong><br>
+        <small>Dati Prima-Dopo</small><br>
+        <small style="font-size: 0.8em; opacity: 0.8;">Campioni dipendenti</small>
       </a>
     </div>
 
     <div class="description">
       <h3>Informazioni sui Test</h3>
       <p>
-        <strong>Test Z:</strong> Utilizzato quando la deviazione standard della popolazione è nota e la dimensione del campione è grande (N > 30).<br><br>
-        <strong>Test t:</strong> Utilizzato quando la deviazione standard della popolazione non è nota e viene stimata dal campione, indipendentemente dalla dimensione del campione.
+        <strong>📊 Test Z:</strong> Utilizzato quando la deviazione standard della popolazione è nota e la dimensione del campione è grande (N > 30). Utilizza la distribuzione normale standard.<br><br>
+        <strong>📈 Test t:</strong> Utilizzato quando la deviazione standard della popolazione non è nota e viene stimata dal campione. Utilizza la distribuzione t-Student con gradi di libertà = N-1.<br><br>
+        <strong>🔗 Test t per Dati Appaiati:</strong> Utilizzato per confrontare le misurazioni dello stesso gruppo di soggetti in due momenti diversi (prima/dopo, pre/post trattamento). Analizza le differenze all'interno di ogni soggetto.
       </p>
     </div>
   </div>

@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test t per Dati Appaiati</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstat/1.9.4/jstat.min.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      border-radius: 20px;
+      padding: 40px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 3px solid #667eea;
+    }
+
+    h1 {
+      color: #2c3e50;
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #7f8c8d;
+      font-size: 1.1em;
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      text-decoration: none;
+      padding: 12px 20px;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .exercise-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      border-left: 5px solid #667eea;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+    }
+
+    .exercise-description {
+      font-size: 1.2em;
+      margin-bottom: 20px;
+      padding: 20px;
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border-radius: 10px;
+      border-left: 4px solid #ffc107;
+      font-weight: 600;
+    }
+
+    .data-table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .data-table th {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 15px;
+      font-weight: 600;
+      font-size: 1.1em;
+    }
+
+    .data-table td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid #e9ecef;
+      font-size: 1.1em;
+    }
+
+    .data-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .data-table tr:hover {
+      background-color: #e3f2fd;
+      transition: background-color 0.3s ease;
+    }
+
+    .solution-button {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(79, 172, 254, 0.3);
+      margin: 20px auto;
+      display: block;
+    }
+
+    .solution-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(79, 172, 254, 0.4);
+    }
+
+    .solution-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 15px;
+      padding: 30px;
+      border-top: 5px solid #28a745;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      animation: slideIn 0.5s ease-out;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .solution-card h2 {
+      color: #2c3e50;
+      font-size: 1.8em;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+
+    .hypothesis {
+      background: rgba(108, 117, 125, 0.1);
+      padding: 15px;
+      border-radius: 8px;
+      margin: 15px 0;
+      border-left: 4px solid #6c757d;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 15px;
+      margin: 20px 0;
+    }
+
+    .stat-box {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 3px solid #17a2b8;
+      text-align: center;
+    }
+
+    .stat-box strong {
+      color: #2c3e50;
+      font-size: 1.1em;
+    }
+
+    .formula {
+      font-family: "Courier New", monospace;
+      background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 1.1em;
+      border: 2px solid #2196f3;
+      text-align: center;
+      box-shadow: 0 5px 15px rgba(33, 150, 243, 0.1);
+    }
+
+    .decision-box {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      border: 2px solid #28a745;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: center;
+      font-size: 1.1em;
+    }
+
+    .decision-box.reject {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      border-color: #dc3545;
+    }
+
+    .interpretation-box {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+      border: 2px solid #ffc107;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+      font-style: italic;
+      font-size: 1.1em;
+    }
+
+    .differences-table {
+      width: 100%;
+      margin: 20px 0;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .differences-table th {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      padding: 12px;
+      font-weight: 600;
+    }
+
+    .differences-table td {
+      padding: 10px 12px;
+      text-align: center;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    .differences-table tr:nth-child(even) {
+      background-color: #f8f9fa;
+    }
+
+    .new-exercise-button {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      font-weight: 600;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+      margin: 20px auto;
+      display: block;
+    }
+
+    .new-exercise-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 25px rgba(40, 167, 69, 0.4);
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 20px;
+        margin: 10px;
+      }
+
+      h1 {
+        font-size: 2em;
+      }
+
+      .back-button {
+        position: static;
+        margin-bottom: 20px;
+        display: inline-block;
+      }
+
+      .exercise-card, .solution-card {
+        padding: 20px;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-button">← Torna al Menu</a>
+
+  <div class="container">
+    <div class="header">
+      <h1>Test t per Dati Appaiati</h1>
+      <p class="subtitle">Confronto Prima-Dopo su Campioni Dipendenti</p>
+    </div>
+
+    <div class="exercise-card">
+      <div id="esercizio"></div>
+    </div>
+
+    <button class="solution-button" onclick="mostraSoluzione()">Mostra Soluzione Completa</button>
+
+    <div id="soluzione"></div>
+  </div>
+
+  <script>
+    let dati = {};
+
+    function generaEsercizio() {
+      const tipiTest = ["destra", "sinistra", "bilaterale"];
+      const tipo = tipiTest[Math.floor(Math.random() * tipiTest.length)];
+
+      const n = Math.floor(Math.random() * 4) + 7; // tra 7 e 10 soggetti
+      let prima = [];
+      let dopo = [];
+      let differenze = [];
+
+      for (let i = 0; i < n; i++) {
+        const base = Math.floor(Math.random() * 3) + 3; // 3-5
+        const variazione = tipo === "destra" ? Math.floor(Math.random() * 3) + 1 : 
+                            tipo === "sinistra" ? -(Math.floor(Math.random() * 3) + 1) :
+                            Math.floor(Math.random() * 5) - 2;
+        const p = base;
+        const d = Math.max(1, Math.min(7, base + variazione)); // mantieni tra 1 e 7
+        prima.push(p);
+        dopo.push(d);
+        differenze.push(d - p);
+      }
+
+      const mediaD = jStat.mean(differenze);
+      const stdD = jStat.stdev(differenze, true);
+      const se = stdD / Math.sqrt(n);
+      const t = mediaD / se;
+      const df = n - 1;
+      const alpha = 0.05;
+
+      let tCritico, decisione, simbolo;
+      if (tipo === "destra") {
+        tCritico = jStat.studentt.inv(1 - alpha, df);
+        decisione = t > tCritico;
+        simbolo = ">";
+      } else if (tipo === "sinistra") {
+        tCritico = -jStat.studentt.inv(1 - alpha, df);
+        decisione = t < tCritico;
+        simbolo = "<";
+      } else {
+        tCritico = jStat.studentt.inv(1 - alpha / 2, df);
+        decisione = Math.abs(t) > tCritico;
+        simbolo = "|t| >";
+      }
+
+      dati = { tipo, prima, dopo, differenze, mediaD, stdD, se, t, df, alpha, tCritico, decisione, simbolo };
+      mostraEsercizio();
+    }
+
+    function mostraEsercizio() {
+      const { tipo, prima, dopo } = dati;
+      const n = prima.length;
+
+      let descrizione;
+      if (tipo === "destra") descrizione = "Verificare se la soddisfazione media <strong>dopo</strong> il trattamento è significativamente <strong>maggiore</strong> rispetto a prima (α = 0.05).";
+      else if (tipo === "sinistra") descrizione = "Verificare se la soddisfazione media <strong>dopo</strong> il trattamento è significativamente <strong>minore</strong> rispetto a prima (α = 0.05).";
+      else descrizione = "Verificare se la soddisfazione media <strong>dopo</strong> il trattamento è significativamente <strong>diversa</strong> rispetto a prima (α = 0.05).";
+
+      let html = `
+        <div class="exercise-description">
+          📊 ${descrizione}
+        </div>
+        <p style="margin-bottom: 15px; font-size: 1.1em; color: #6c757d;">
+          <strong>Scenario:</strong> Un gruppo di ${n} partecipanti ha valutato la propria soddisfazione prima e dopo un trattamento (scala 1-7).
+        </p>
+        <table class="data-table">
+          <tr>
+            <th>👤 Soggetto</th>
+            <th>📉 Prima</th>
+            <th>📈 Dopo</th>
+          </tr>
+      `;
+      
+      for (let i = 0; i < n; i++) {
+        html += `<tr><td><strong>${i + 1}</strong></td><td>${prima[i]}</td><td>${dopo[i]}</td></tr>`;
+      }
+      html += `</table>`;
+      
+      document.getElementById("esercizio").innerHTML = html;
+      document.getElementById("soluzione").innerHTML = "";
+    }
+
+    function mostraSoluzione() {
+      const { tipo, prima, dopo, differenze, mediaD, stdD, se, t, df, tCritico, decisione, simbolo } = dati;
+
+      let H0 = "H₀: μD = 0 (nessuna differenza media)";
+      let H1 = tipo === "destra" ? "H₁: μD > 0 (miglioramento)" :
+               tipo === "sinistra" ? "H₁: μD < 0 (peggioramento)" :
+               "H₁: μD ≠ 0 (differenza significativa)";
+
+      // Crea tabella delle differenze
+      let differenzeTable = `
+        <table class="differences-table">
+          <tr>
+            <th>Soggetto</th>
+            <th>Prima</th>
+            <th>Dopo</th>
+            <th>Differenza (D = Dopo - Prima)</th>
+          </tr>
+      `;
+      
+      for (let i = 0; i < prima.length; i++) {
+        const diff = differenze[i];
+        const diffColor = diff > 0 ? 'color: #28a745; font-weight: bold;' : 
+                         diff < 0 ? 'color: #dc3545; font-weight: bold;' : 
+                         'color: #6c757d;';
+        differenzeTable += `
+          <tr>
+            <td><strong>${i + 1}</strong></td>
+            <td>${prima[i]}</td>
+            <td>${dopo[i]}</td>
+            <td style="${diffColor}">${diff > 0 ? '+' : ''}${diff}</td>
+          </tr>
+        `;
+      }
+      differenzeTable += `</table>`;
+
+      let decisioneText = "";
+      if (tipo === "destra") {
+        decisioneText = `Siccome t = ${t.toFixed(3)} ${decisione ? ">" : "≤"} t<sub>critico</sub> = ${tCritico.toFixed(3)}`;
+      } else if (tipo === "sinistra") {
+        decisioneText = `Siccome t = ${t.toFixed(3)} ${decisione ? "<" : "≥"} t<sub>critico</sub> = ${tCritico.toFixed(3)}`;
+      } else {
+        decisioneText = `Siccome |t| = ${Math.abs(t).toFixed(3)} ${decisione ? ">" : "≤"} t<sub>critico</sub> = ${Math.abs(tCritico).toFixed(3)}`;
+      }
+
+      let interpretazione = tipo === "destra"
+        ? (decisione ? "🎉 La soddisfazione dopo il trattamento è <strong>significativamente maggiore</strong> rispetto a prima." : "📊 Non ci sono prove sufficienti che la soddisfazione sia aumentata significativamente.")
+        : tipo === "sinistra"
+        ? (decisione ? "📉 La soddisfazione dopo il trattamento è <strong>significativamente minore</strong> rispetto a prima." : "📊 Non ci sono prove sufficienti che la soddisfazione sia diminuita significativamente.")
+        : (decisione ? "🔄 La soddisfazione dopo il trattamento è <strong>significativamente diversa</strong> rispetto a prima." : "📊 Non ci sono prove sufficienti di una differenza significativa.");
+
+      let html = `
+        <div class="solution-card">
+          <h2>🔍 Soluzione Completa</h2>
+          
+          <div class="hypothesis">
+            <p><strong>Ipotesi nulla:</strong> ${H0}</p>
+            <p><strong>Ipotesi alternativa:</strong> ${H1}</p>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📋 Calcolo delle Differenze:</h3>
+          ${differenzeTable}
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">📊 Statistiche delle Differenze:</h3>
+          <div class="stats-grid">
+            <div class="stat-box">
+              <strong>Media Differenze (D̄)</strong><br>
+              ${mediaD.toFixed(3)}
+            </div>
+            <div class="stat-box">
+              <strong>Deviazione Standard (sD)</strong><br>
+              ${stdD.toFixed(3)}
+            </div>
+            <div class="stat-box">
+              <strong>Errore Standard (SE)</strong><br>
+              ${se.toFixed(3)}
+            </div>
+            <div class="stat-box">
+              <strong>Gradi di Libertà (df)</strong><br>
+              ${df}
+            </div>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">🧮 Calcolo della Statistica t:</h3>
+          <div class="formula">
+            <strong>t = D̄ / (sD / √n)</strong><br><br>
+            t = ${mediaD.toFixed(3)} / (${stdD.toFixed(3)} / √${prima.length})<br>
+            t = ${mediaD.toFixed(3)} / ${se.toFixed(3)}<br>
+            <strong>t = ${t.toFixed(3)}</strong>
+          </div>
+
+          <div class="stat-box" style="margin: 20px 0; background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+            <strong>Valore Critico: t<sub>critico</sub> = ${tipo === "bilaterale" ? "±" : ""}${Math.abs(tCritico).toFixed(3)}</strong>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">⚖️ Decisione Statistica:</h3>
+          <div class="decision-box ${decisione ? 'reject' : ''}">
+            <p>${decisioneText}, <strong>${decisione ? "rifiutiamo" : "non rifiutiamo"} H₀</strong>.</p>
+          </div>
+
+          <h3 style="color: #2c3e50; margin: 20px 0 15px 0;">💭 Interpretazione:</h3>
+          <div class="interpretation-box">
+            <p>${interpretazione}</p>
+            <p style="margin-top: 10px; font-size: 0.95em;">
+              Con un livello di significatività del 5% e ${df} gradi di libertà, ${decisione ? "abbiamo prove statistiche sufficienti" : "non abbiamo prove statistiche sufficienti"} per concludere che il trattamento ha avuto un effetto ${tipo === "destra" ? "positivo" : tipo === "sinistra" ? "negativo" : "significativo"}.
+            </p>
+          </div>
+
+          <button class="new-exercise-button" onclick="generaEsercizio()">🔄 Genera Nuovo Esercizio</button>
+        </div>
+      `;
+      document.getElementById("soluzione").innerHTML = html;
+    }
+
+    window.onload = generaEsercizio;
+  </script>
+</body>
+</html>
