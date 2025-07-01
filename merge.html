@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Statistici Unificati - Psicometria</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+      position: relative;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .timer {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      background: rgba(255,255,255,0.2);
+      padding: 10px 20px;
+      border-radius: 25px;
+      backdrop-filter: blur(10px);
+    }
+
+    .timer-display {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.3);
+      margin-top: 20px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #fff;
+      width: 0%;
+      transition: width 0.3s ease;
+      border-radius: 3px;
+    }
+
+    .content {
+      padding: 40px;
+    }
+
+    .test-section {
+      margin-bottom: 50px;
+      padding: 30px;
+      border-radius: 12px;
+      background: linear-gradient(145deg, #f8f9ff, #e8f4f8);
+      border-left: 5px solid #4facfe;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    }
+
+    .test-title {
+      font-size: 1.8em;
+      color: #2c3e50;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+    }
+
+    .test-number {
+      background: linear-gradient(135deg, #4facfe, #00f2fe);
+      color: white;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1.2em;
+    }
+
+    .data-section {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      margin-bottom: 25px;
+      border: 1px solid #e0e6ed;
+    }
+
+    .data-section h4 {
+      color: #34495e;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 15px 0;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px 15px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: white;
+      font-weight: 600;
+    }
+
+    td {
+      background: #f8f9fa;
+    }
+
+    tr:nth-child(even) td {
+      background: #e9ecef;
+    }
+
+    .question {
+      margin: 25px 0;
+      padding: 20px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #e0e6ed;
+      transition: all 0.3s ease;
+    }
+
+    .question:hover {
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      transform: translateY(-2px);
+    }
+
+    .question h4 {
+      color: #2c3e50;
+      margin-bottom: 15px;
+      font-size: 1.1em;
+    }
+
+    .option {
+      display: flex;
+      align-items: center;
+      margin: 10px 0;
+      padding: 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      background: #f8f9fa;
+    }
+
+    .option:hover {
+      background: #e3f2fd;
+      transform: translateX(5px);
+    }
+
+    .option input[type="radio"] {
+      margin-right: 12px;
+      transform: scale(1.2);
+    }
+
+    .submit-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 1.1em;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: block;
+      margin: 40px auto;
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+    }
+
+    .submit-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .results {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px;
+      border-radius: 15px;
+      margin-top: 30px;
+      text-align: center;
+    }
+
+    .results h2 {
+      font-size: 2.2em;
+      margin-bottom: 20px;
+    }
+
+    .score-display {
+      font-size: 3em;
+      font-weight: bold;
+      margin: 20px 0;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .time-display {
+      font-size: 1.5em;
+      margin: 15px 0;
+      opacity: 0.9;
+    }
+
+    .detailed-results {
+      background: white;
+      color: #2c3e50;
+      padding: 30px;
+      border-radius: 12px;
+      margin-top: 30px;
+      text-align: left;
+    }
+
+    .result-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px;
+      margin: 10px 0;
+      border-radius: 8px;
+      background: #f8f9fa;
+    }
+
+    .correct {
+      border-left: 4px solid #28a745;
+      background: #d4edda;
+    }
+
+    .incorrect {
+      border-left: 4px solid #dc3545;
+      background: #f8d7da;
+    }
+
+    .status-icon {
+      font-size: 1.5em;
+    }
+
+    .restart-button {
+      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      font-size: 1em;
+      border-radius: 25px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: all 0.3s ease;
+    }
+
+    .restart-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        margin: 10px;
+        border-radius: 10px;
+      }
+      
+      .header {
+        padding: 20px;
+      }
+      
+      .header h1 {
+        font-size: 1.8em;
+      }
+      
+      .timer {
+        position: static;
+        margin-top: 15px;
+        text-align: center;
+      }
+      
+      .content {
+        padding: 20px;
+      }
+      
+      .test-section {
+        padding: 20px;
+        margin-bottom: 30px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <div class="timer">
+      <div class="timer-display" id="timerDisplay">00:00</div>
+    </div>
+    <h1>Test Statistici Unificati</h1>
+    <p>Test Z, Test t e Test Chi-quadro</p>
+    <div class="progress-bar">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+  </div>
+
+  <div class="content" id="testContent">
+    <!-- Test Z -->
+    <div class="test-section">
+      <div class="test-title">
+        <div class="test-number">1</div>
+        <span>Test Z per un campione</span>
+      </div>
+      <div class="data-section" id="testZData"></div>
+      <div id="testZQuestions"></div>
+    </div>
+
+    <!-- Test t -->
+    <div class="test-section">
+      <div class="test-title">
+        <div class="test-number">2</div>
+        <span>Test t per due campioni indipendenti</span>
+      </div>
+      <div class="data-section" id="testTData"></div>
+      <div id="testTQuestions"></div>
+    </div>
+
+    <!-- Test Chi-quadro -->
+    <div class="test-section">
+      <div class="test-title">
+        <div class="test-number">3</div>
+        <span>Test del Chi-quadro</span>
+      </div>
+      <div class="data-section" id="testChiData"></div>
+      <div id="testChiQuestions"></div>
+    </div>
+
+    <button class="submit-button" onclick="submitAllTests()">Completa Test</button>
+  </div>
+
+  <div class="results hidden" id="results">
+    <h2>Risultati del Test</h2>
+    <div class="score-display" id="finalScore"></div>
+    <div class="time-display" id="finalTime"></div>
+    <div class="detailed-results" id="detailedResults"></div>
+    <button class="restart-button" onclick="restartTest()">Ripeti Test</button>
+  </div>
+</div>
+
+<script>
+  // Timer
+  let startTime = Date.now();
+  let timerInterval;
+
+  function updateTimer() {
+    const elapsed = Date.now() - startTime;
+    const minutes = Math.floor(elapsed / 60000);
+    const seconds = Math.floor((elapsed % 60000) / 1000);
+    document.getElementById('timerDisplay').textContent = 
+      `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  }
+
+  function startTimer() {
+    startTime = Date.now();
+    timerInterval = setInterval(updateTimer, 1000);
+  }
+
+  function stopTimer() {
+    clearInterval(timerInterval);
+  }
+
+  // Utility functions
+  function getRandom(min, max, decimals = 2) {
+    return parseFloat((Math.random() * (max - min) + min).toFixed(decimals));
+  }
+
+  function getInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Test data and questions
+  let allQuestions = [];
+  let correctAnswers = [];
+
+  // Test Z
+  function initTestZ() {
+    const mu = getRandom(3.5, 6);
+    const sigma = getRandom(1.5, 3);
+    const N = Math.floor(Math.random() * 26) + 25;
+    const delta = getRandom(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1);
+    const mediaCampione = +(mu + delta).toFixed(2);
+    const zCalcolato = +((mediaCampione - mu) / (sigma / Math.sqrt(N))).toFixed(2);
+    const zCritico = 1.96;
+
+    document.getElementById('testZData').innerHTML = `
+      <h4>Scenario del Test Z</h4>
+      <p>Un gruppo di docenti (<strong>N = ${N}</strong>) ha riportato una media di soddisfazione lavorativa di <strong>Ẋ = ${mediaCampione}</strong>.</p>
+      <p>La media della popolazione è <strong>μ = ${mu}</strong>, con deviazione standard <strong>σ = ${sigma}</strong>.</p>
+      <p>Si vuole verificare se la media del campione è significativamente diversa da quella della popolazione (test bilaterale, α = 0.05).</p>
+    `;
+
+    const questions = [
+      {
+        text: "Qual è il valore z calcolato?",
+        options: [
+          (zCalcolato - 1).toFixed(2),
+          zCalcolato.toFixed(2),
+          (zCalcolato + 1).toFixed(2),
+          "1.96"
+        ],
+        correct: 1,
+        test: "Test Z"
+      },
+      {
+        text: "Quale conclusione si può trarre dal test?",
+        options: Math.abs(zCalcolato) > zCritico ? [
+          "Si rifiuta H₀: la media dei docenti è significativamente diversa",
+          "Non si rifiuta H₀: la media dei docenti è uguale alla popolazione",
+          "Si accetta H₀: la media è simile",
+          "Non è possibile trarre conclusioni"
+        ] : [
+          "Non si rifiuta H₀: la media dei docenti è uguale alla popolazione",
+          "Si rifiuta H₀: la media dei docenti è significativamente diversa",
+          "Si accetta H₀: la media è simile",
+          "Non è possibile trarre conclusioni"
+        ],
+        correct: 0,
+        test: "Test Z"
+      }
+    ];
+
+    allQuestions.push(...questions);
+    displayQuestions('testZQuestions', questions, 0);
+  }
+
+  // Test t
+  function initTestT() {
+    const N1 = Math.floor(getRandom(10, 20));
+    const N2 = Math.floor(getRandom(10, 20));
+    const X1 = getRandom(4.5, 6);
+    const X2 = getRandom(3, X1 - 0.1);
+    const s1_sq = getRandom(0.5, 2);
+    const s2_sq = getRandom(0.5, 2);
+
+    const pooled = ((N1 - 1) * s1_sq + (N2 - 1) * s2_sq) / (N1 + N2 - 2);
+    const SE_diff = Math.sqrt(pooled * (1 / N1 + 1 / N2));
+    const t_calc = +((X1 - X2) / SE_diff).toFixed(2);
+    const t_crit = 1.68;
+
+    document.getElementById('testTData').innerHTML = `
+      <h4>Scenario del Test t</h4>
+      <p><strong>Gruppo 1 (es. donne)</strong>: N = ${N1}, media = ${X1}, varianza = ${s1_sq.toFixed(2)}</p>
+      <p><strong>Gruppo 2 (es. uomini)</strong>: N = ${N2}, media = ${X2}, varianza = ${s2_sq.toFixed(2)}</p>
+      <p>Ipotesi: la media del Gruppo 1 è significativamente <strong>maggiore</strong> della media del Gruppo 2.</p>
+      <p>Test t per campioni indipendenti con varianze uguali, test a una coda, α = 0.05</p>
+    `;
+
+    const questions = [
+      {
+        text: "Qual è il valore t calcolato?",
+        options: [
+          (t_calc - 1).toFixed(2),
+          t_calc.toFixed(2),
+          (t_calc + 1).toFixed(2),
+          "1.68"
+        ],
+        correct: 1,
+        test: "Test t"
+      },
+      {
+        text: "Qual è la conclusione del test?",
+        options: t_calc > t_crit ? [
+          "Si rifiuta H₀: la media del Gruppo 1 è significativamente maggiore",
+          "Non si rifiuta H₀: le medie sono uguali",
+          "Si accetta H₀: non ci sono differenze",
+          "Conclusione non possibile"
+        ] : [
+          "Non si rifiuta H₀: le medie sono uguali",
+          "Si rifiuta H₀: la media del Gruppo 1 è maggiore",
+          "Si accetta H₀: non ci sono differenze",
+          "Conclusione non possibile"
+        ],
+        correct: 0,
+        test: "Test t"
+      }
+    ];
+
+    allQuestions.push(...questions);
+    displayQuestions('testTQuestions', questions, 2);
+  }
+
+  // Test Chi-quadro
+  function initTestChi() {
+    const reati = ["Rapina", "Spaccio", "Omicidio"];
+    const disturbi = ["Borderline", "Antisociale"];
+
+    const osservati = [
+      [getInt(1, 5), getInt(3, 8), getInt(0, 4)],
+      [getInt(1, 5), getInt(3, 8), getInt(0, 5)]
+    ];
+
+    const totRiga = osservati.map(r => r.reduce((a, b) => a + b, 0));
+    const totColonna = osservati[0].map((_, j) => osservati[0][j] + osservati[1][j]);
+    const totTotale = totRiga.reduce((a, b) => a + b, 0);
+
+    const attesi = osservati.map((r, i) =>
+      r.map((_, j) => (totRiga[i] * totColonna[j]) / totTotale)
+    );
+
+    let chi2 = 0;
+    for (let i = 0; i < 2; i++) {
+      for (let j = 0; j < 3; j++) {
+        const fo = osservati[i][j];
+        const fe = attesi[i][j];
+        chi2 += Math.pow(fo - fe, 2) / fe;
+      }
+    }
+    chi2 = +chi2.toFixed(2);
+    const chiCritico = 5.99;
+
+    let tableHtml = `<table><tr><th></th>`;
+    reati.forEach(r => tableHtml += `<th>${r}</th>`);
+    tableHtml += `</tr>`;
+    for (let i = 0; i < 2; i++) {
+      tableHtml += `<tr><td><strong>${disturbi[i]}</strong></td>`;
+      for (let j = 0; j < 3; j++) {
+        tableHtml += `<td>${osservati[i][j]}</td>`;
+      }
+      tableHtml += `</tr>`;
+    }
+    tableHtml += `</table>`;
+
+    document.getElementById('testChiData').innerHTML = `
+      <h4>Scenario del Test Chi-quadro</h4>
+      <p><strong>Ipotesi nulla (H₀):</strong> non c'è associazione tra tipo di reato e disturbo di personalità.</p>
+      <p>α = 0.05 | Gradi di libertà = 2 | Valore critico = 5.99</p>
+      <p>Tabella delle frequenze osservate:</p>
+      ${tableHtml}
+    `;
+
+    const questions = [
+      {
+        text: "Qual è il valore del chi-quadro calcolato?",
+        options: [
+          (chi2 - 1).toFixed(2),
+          chi2.toFixed(2),
+          (chi2 + 1).toFixed(2),
+          "5.99"
+        ],
+        correct: 1,
+        test: "Test Chi-quadro"
+      },
+      {
+        text: "Qual è la conclusione del test?",
+        options: chi2 > chiCritico ? [
+          "Si rifiuta H₀: esiste un'associazione tra reato e disturbo",
+          "Non si rifiuta H₀: le variabili sono indipendenti",
+          "Si accetta H₀: non c'è differenza",
+          "Conclusione non possibile"
+        ] : [
+          "Non si rifiuta H₀: le variabili sono indipendenti",
+          "Si rifiuta H₀: esiste un'associazione tra reato e disturbo",
+          "Si accetta H₀: non c'è differenza",
+          "Conclusione non possibile"
+        ],
+        correct: 0,
+        test: "Test Chi-quadro"
+      }
+    ];
+
+    allQuestions.push(...questions);
+    displayQuestions('testChiQuestions', questions, 4);
+  }
+
+  function displayQuestions(containerId, questions, startIndex) {
+    let html = '';
+    questions.forEach((q, i) => {
+      const qIndex = startIndex + i;
+      html += `
+        <div class="question">
+          <h4>${q.text}</h4>
+          ${q.options.map((opt, optIndex) => `
+            <div class="option">
+              <input type="radio" name="q${qIndex}" value="${optIndex}" id="q${qIndex}_${optIndex}">
+              <label for="q${qIndex}_${optIndex}">${opt}</label>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    });
+    document.getElementById(containerId).innerHTML = html;
+  }
+
+  function updateProgress() {
+    const totalQuestions = allQuestions.length;
+    let answeredQuestions = 0;
+    
+    for (let i = 0; i < totalQuestions; i++) {
+      const checked = document.querySelector(`input[name="q${i}"]:checked`);
+      if (checked) answeredQuestions++;
+    }
+    
+    const progress = (answeredQuestions / totalQuestions) * 100;
+    document.getElementById('progressFill').style.width = progress + '%';
+  }
+
+  // Event listeners for progress tracking
+  document.addEventListener('change', function(e) {
+    if (e.target.type === 'radio') {
+      updateProgress();
+    }
+  });
+
+  function submitAllTests() {
+    stopTimer();
+    const totalQuestions = allQuestions.length;
+    let correctCount = 0;
+    let results = [];
+
+    for (let i = 0; i < totalQuestions; i++) {
+      const question = allQuestions[i];
+      const selectedAnswer = document.querySelector(`input[name="q${i}"]:checked`);
+      const isCorrect = selectedAnswer && parseInt(selectedAnswer.value) === question.correct;
+      
+      if (isCorrect) correctCount++;
+
+      results.push({
+        questionText: question.text,
+        test: question.test,
+        selectedAnswer: selectedAnswer ? question.options[parseInt(selectedAnswer.value)] : "Nessuna risposta",
+        correctAnswer: question.options[question.correct],
+        isCorrect: isCorrect
+      });
+    }
+
+    const percentage = Math.round((correctCount / totalQuestions) * 100);
+    const elapsedTime = Date.now() - startTime;
+    const minutes = Math.floor(elapsedTime / 60000);
+    const seconds = Math.floor((elapsedTime % 60000) / 1000);
+
+    showResults(correctCount, totalQuestions, percentage, minutes, seconds, results);
+  }
+
+  function showResults(correct, total, percentage, minutes, seconds, detailedResults) {
+    document.getElementById('testContent').classList.add('hidden');
+    document.getElementById('results').classList.remove('hidden');
+
+    document.getElementById('finalScore').textContent = `${correct}/${total} (${percentage}%)`;
+    document.getElementById('finalTime').textContent = `Tempo impiegato: ${minutes}:${seconds.toString().padStart(2, '0')}`;
+
+    let detailedHtml = '<h3>Riepilogo dettagliato:</h3>';
+    detailedResults.forEach((result, index) => {
+      detailedHtml += `
+        <div class="result-item ${result.isCorrect ? 'correct' : 'incorrect'}">
+          <div>
+            <strong>${result.test} - Domanda ${index + 1}</strong><br>
+            <em>${result.questionText}</em><br>
+            <small>Tua risposta: ${result.selectedAnswer}</small><br>
+            ${!result.isCorrect ? `<small>Risposta corretta: ${result.correctAnswer}</small>` : ''}
+          </div>
+          <div class="status-icon">
+            ${result.isCorrect ? '✅' : '❌'}
+          </div>
+        </div>
+      `;
+    });
+
+    document.getElementById('detailedResults').innerHTML = detailedHtml;
+  }
+
+  function restartTest() {
+    // Reset all data
+    allQuestions = [];
+    correctAnswers = [];
+    
+    // Show test content and hide results
+    document.getElementById('testContent').classList.remove('hidden');
+    document.getElementById('results').classList.add('hidden');
+    
+    // Reset progress bar
+    document.getElementById('progressFill').style.width = '0%';
+    
+    // Reinitialize tests
+    initializeTests();
+    
+    // Restart timer
+    startTimer();
+  }
+
+  function initializeTests() {
+    initTestZ();
+    initTestT();
+    initTestChi();
+  }
+
+  // Initialize everything when page loads
+  document.addEventListener('DOMContentLoaded', function() {
+    initializeTests();
+    startTimer();
+  });
+</script>
+
+</body>
+</html>
