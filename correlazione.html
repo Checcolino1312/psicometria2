@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Correlazione di Pearson - Tabella con σ</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 5px;
+      text-align: center;
+    }
+    .question { margin-top: 20px; }
+    .result { font-weight: bold; margin-top: 20px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Test di correlazione (r di Pearson)</h2>
+
+<div id="dati"></div>
+<div class="question" id="domande"></div>
+<button onclick="verificaRisposte()">Verifica Risposte</button>
+<div class="result" id="risultato"></div>
+
+<script>
+  function getRandomInt(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  const moralita = Array.from({ length: 5 }, () => getRandomInt(3, 7));
+  const reati = Array.from({ length: 5 }, () => getRandomInt(0, 4));
+  const n = moralita.length;
+
+  // Medie
+  const mediaX = moralita.reduce((a, b) => a + b) / n;
+  const mediaY = reati.reduce((a, b) => a + b) / n;
+
+  // Tabelle e somme
+  let tableHtml = `<table><tr>
+    <th>Sogg</th><th>X (Moralità)</th><th>Y (Reati)</th>
+    <th>X − X̄</th><th>Y − Ȳ</th><th>(X−X̄)(Y−Ȳ)</th></tr>`;
+
+  let sommaXY = 0, sommaX2 = 0, sommaY2 = 0;
+
+  for (let i = 0; i < n; i++) {
+    const x = moralita[i];
+    const y = reati[i];
+    const dx = x - mediaX;
+    const dy = y - mediaY;
+    const dxdy = dx * dy;
+
+    sommaXY += dxdy;
+    sommaX2 += dx * dx;
+    sommaY2 += dy * dy;
+
+    tableHtml += `<tr>
+      <td>${i + 1}</td>
+      <td>${x}</td>
+      <td>${y}</td>
+      <td>${dx.toFixed(2)}</td>
+      <td>${dy.toFixed(2)}</td>
+      <td>${dxdy.toFixed(2)}</td>
+    </tr>`;
+  }
+
+  const sigmaX = +(Math.sqrt(sommaX2 / n)).toFixed(2);
+  const sigmaY = +(Math.sqrt(sommaY2 / n)).toFixed(2);
+
+  const r = +(sommaXY / Math.sqrt(sommaX2 * sommaY2)).toFixed(2);
+  const t = +(r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r)).toFixed(2);
+  const tCritico = 3.182;
+
+  tableHtml += `</table>`;
+
+  document.getElementById("dati").innerHTML = `
+    <p><strong>Obiettivo:</strong> Verificare se esiste un'associazione lineare tra il punteggio di moralità e il numero di reati lievi.</p>
+    <p>α = 0.05 (bilaterale) — Test di correlazione di Pearson</p>
+    <ul>
+      <li><strong>X̄</strong> = ${mediaX.toFixed(2)}</li>
+      <li><strong>Ȳ</strong> = ${mediaY.toFixed(2)}</li>
+      <li><strong>σₓ</strong> = ${sigmaX}</li>
+      <li><strong>σᵧ</strong> = ${sigmaY}</li>
+    </ul>
+    ${tableHtml}
+  `;
+
+  const domande = [
+    {
+      testo: "1. Qual è il valore del coefficiente di correlazione r?",
+      opzioni: [
+        (r - 0.1).toFixed(2),
+        r.toFixed(2),
+        (r + 0.1).toFixed(2),
+        "0.00"
+      ],
+      corretta: 1
+    },
+    {
+      testo: "2. Qual è la conclusione del test t?",
+      opzioni: Math.abs(t) > tCritico ? [
+        "Si rifiuta H₀: esiste una correlazione significativa",
+        "Non si rifiuta H₀: nessuna correlazione significativa",
+        "Si accetta H₀",
+        "Conclusione non determinabile"
+      ] : [
+        "Non si rifiuta H₀: nessuna correlazione significativa",
+        "Si rifiuta H₀: esiste una correlazione significativa",
+        "Si accetta H₀",
+        "Conclusione non determinabile"
+      ],
+      corretta: 0
+    }
+  ];
+
+  function mostraDomande() {
+    let html = "";
+    domande.forEach((dom, i) => {
+      html += `<div><p>${dom.testo}</p>`;
+      dom.opzioni.forEach((opt, j) => {
+        html += `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label><br>`;
+      });
+      html += "</div><hr>";
+    });
+    document.getElementById("domande").innerHTML = html;
+  }
+
+  function verificaRisposte() {
+    let corrette = 0;
+    domande.forEach((dom, i) => {
+      const risp = document.querySelector(`input[name="q${i}"]:checked`);
+      if (risp && parseInt(risp.value) === dom.corretta) corrette++;
+    });
+    document.getElementById("risultato").innerHTML =
+      `Hai risposto correttamente a ${corrette} su ${domande.length} domande.`;
+  }
+
+  mostraDomande();
+</script>
+
+</body>
+</html>
