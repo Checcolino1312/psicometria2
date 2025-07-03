@@ -342,7 +342,7 @@
       <div class="timer-display" id="timerDisplay">00:00</div>
     </div>
     <h1>Test Statistici Unificati</h1>
-    <p>Test Z, Test t e Test Chi-quadro</p>
+    <p>Test Z, Test t, Test Chi-quadro e Test di Correlazione</p>
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill"></div>
     </div>
@@ -377,6 +377,16 @@
       </div>
       <div class="data-section" id="testChiData"></div>
       <div id="testChiQuestions"></div>
+    </div>
+
+    <!-- Test Correlazione -->
+    <div class="test-section">
+      <div class="test-title">
+        <div class="test-number">4</div>
+        <span>Test di Correlazione di Pearson</span>
+      </div>
+      <div class="data-section" id="testCorrelationData"></div>
+      <div id="testCorrelationQuestions"></div>
     </div>
 
     <button class="submit-button" onclick="submitAllTests()">Completa Test</button>
@@ -616,6 +626,106 @@
     displayQuestions('testChiQuestions', questions, 4);
   }
 
+  // Test Correlazione
+  function initTestCorrelation() {
+    const moralita = Array.from({ length: 5 }, () => Math.floor(Math.random() * 5) + 3);
+    const reati = Array.from({ length: 5 }, () => Math.floor(Math.random() * 5));
+    const n = moralita.length;
+
+    // Medie
+    const mediaX = moralita.reduce((a, b) => a + b) / n;
+    const mediaY = reati.reduce((a, b) => a + b) / n;
+
+    // Calcoli per correlazione
+    let sommaXY = 0, sommaX2 = 0, sommaY2 = 0;
+    let tableRows = '';
+
+    for (let i = 0; i < n; i++) {
+      const x = moralita[i];
+      const y = reati[i];
+      const dx = x - mediaX;
+      const dy = y - mediaY;
+      const dxdy = dx * dy;
+
+      sommaXY += dxdy;
+      sommaX2 += dx * dx;
+      sommaY2 += dy * dy;
+
+      tableRows += `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${x}</td>
+          <td>${y}</td>
+          <td>${dx.toFixed(2)}</td>
+          <td>${dy.toFixed(2)}</td>
+          <td>${dxdy.toFixed(2)}</td>
+        </tr>
+      `;
+    }
+
+    const sigmaX = +(Math.sqrt(sommaX2 / n)).toFixed(2);
+    const sigmaY = +(Math.sqrt(sommaY2 / n)).toFixed(2);
+    const r = +(sommaXY / Math.sqrt(sommaX2 * sommaY2)).toFixed(2);
+    const t = +(r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r)).toFixed(2);
+    const tCritico = 3.182;
+
+    const correlationTable = `
+      <table>
+        <tr>
+          <th>Sogg</th><th>X (Moralità)</th><th>Y (Reati)</th>
+          <th>X − X̄</th><th>Y − Ȳ</th><th>(X−X̄)(Y−Ȳ)</th>
+        </tr>
+        ${tableRows}
+      </table>
+    `;
+
+    document.getElementById('testCorrelationData').innerHTML = `
+      <h4>Scenario del Test di Correlazione</h4>
+      <p><strong>Obiettivo:</strong> Verificare se esiste un'associazione lineare tra il punteggio di moralità e il numero di reati lievi.</p>
+      <p>α = 0.05 (bilaterale) — Test di correlazione di Pearson</p>
+      <ul>
+        <li><strong>X̄</strong> = ${mediaX.toFixed(2)}</li>
+        <li><strong>Ȳ</strong> = ${mediaY.toFixed(2)}</li>
+        <li><strong>σₓ</strong> = ${sigmaX}</li>
+        <li><strong>σᵧ</strong> = ${sigmaY}</li>
+      </ul>
+      ${correlationTable}
+    `;
+
+    const questions = [
+      {
+        text: "Qual è il valore del coefficiente di correlazione r?",
+        options: [
+          (r - 0.1).toFixed(2),
+          r.toFixed(2),
+          (r + 0.1).toFixed(2),
+          "0.00"
+        ],
+        correct: 1,
+        test: "Test Correlazione"
+      },
+      {
+        text: "Qual è la conclusione del test t?",
+        options: Math.abs(t) > tCritico ? [
+          "Si rifiuta H₀: esiste una correlazione significativa",
+          "Non si rifiuta H₀: nessuna correlazione significativa",
+          "Si accetta H₀",
+          "Conclusione non determinabile"
+        ] : [
+          "Non si rifiuta H₀: nessuna correlazione significativa",
+          "Si rifiuta H₀: esiste una correlazione significativa",
+          "Si accetta H₀",
+          "Conclusione non determinabile"
+        ],
+        correct: 0,
+        test: "Test Correlazione"
+      }
+    ];
+
+    allQuestions.push(...questions);
+    displayQuestions('testCorrelationQuestions', questions, 6);
+  }
+
   function displayQuestions(containerId, questions, startIndex) {
     let html = '';
     questions.forEach((q, i) => {
@@ -735,6 +845,7 @@
     initTestZ();
     initTestT();
     initTestChi();
+    initTestCorrelation();
   }
 
   // Initialize everything when page loads
