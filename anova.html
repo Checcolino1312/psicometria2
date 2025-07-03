@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>ANOVA - Esercizio Interattivo</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    table, th, td {
+      border: 1px solid black;
+      border-collapse: collapse;
+      padding: 5px;
+      text-align: center;
+    }
+    .question { margin-top: 20px; }
+    .result { font-weight: bold; margin-top: 20px; }
+    button { margin-top: 10px; }
+  </style>
+</head>
+<body>
+
+<h2>Test ANOVA a una via</h2>
+<div id="dati"></div>
+<div class="question" id="domande"></div>
+<button onclick="verificaRisposte()">Verifica Risposte</button>
+<div class="result" id="risultato"></div>
+
+<script>
+  function getRandomGroup(n, min, max) {
+    return Array.from({length: n}, () => Math.floor(Math.random() * (max - min + 1)) + min);
+  }
+
+  const insegnanti = getRandomGroup(5, 3, 8);
+  const meccanici = getRandomGroup(4, 2, 6);
+  const camionisti = getRandomGroup(4, 3, 6);
+
+  const allData = insegnanti.concat(meccanici, camionisti);
+
+  function mean(arr) {
+    return arr.reduce((a, b) => a + b, 0) / arr.length;
+  }
+
+  function sumSquares(arr, groupMean) {
+    return arr.reduce((sum, val) => sum + Math.pow(val - groupMean, 2), 0);
+  }
+
+  const meanTotal = mean(allData);
+  const k = 3;
+  const N = allData.length;
+
+  const meanGroups = {
+    Insegnanti: mean(insegnanti),
+    Meccanici: mean(meccanici),
+    Camionisti: mean(camionisti)
+  };
+
+  const SSB = +(insegnanti.length * Math.pow(meanGroups.Insegnanti - meanTotal, 2)
+              + meccanici.length * Math.pow(meanGroups.Meccanici - meanTotal, 2)
+              + camionisti.length * Math.pow(meanGroups.Camionisti - meanTotal, 2)).toFixed(2);
+
+  const SSW = +(sumSquares(insegnanti, meanGroups.Insegnanti)
+              + sumSquares(meccanici, meanGroups.Meccanici)
+              + sumSquares(camionisti, meanGroups.Camionisti)).toFixed(2);
+
+  const MSB = +(SSB / (k - 1)).toFixed(2);
+  const MSW = +(SSW / (N - k)).toFixed(2);
+  const F = +(MSB / MSW).toFixed(2);
+  const Fcritico = 3.88;
+
+  function createTable() {
+    let html = "<table><tr><th>#</th><th>Insegnanti</th><th>Meccanici</th><th>Camionisti</th></tr>";
+    for (let i = 0; i < 5; i++) {
+      html += "<tr><td>" + (i+1) + "</td>";
+      html += "<td>" + (insegnanti[i] ?? "") + "</td>";
+      html += "<td>" + (meccanici[i] ?? "") + "</td>";
+      html += "<td>" + (camionisti[i] ?? "") + "</td></tr>";
+    }
+    html += "</table>";
+    return html;
+  }
+
+  document.getElementById("dati").innerHTML = `
+    <p><strong>Obiettivo:</strong> Verificare se il livello medio di resilienza differisce tra i tre gruppi.</p>
+    ${createTable()}
+    <p><strong>Media Totale:</strong> ${meanTotal.toFixed(2)}</p>
+    <p><strong>Media Insegnanti:</strong> ${meanGroups.Insegnanti.toFixed(2)} |
+       <strong>Meccanici:</strong> ${meanGroups.Meccanici.toFixed(2)} |
+       <strong>Camionisti:</strong> ${meanGroups.Camionisti.toFixed(2)}</p>
+    <p><strong>SSB (tra gruppi):</strong> ${SSB} |
+       <strong>SSW (entro gruppi):</strong> ${SSW}</p>
+    <p>Test ANOVA a una via con α = 0.05 (bilaterale). F critico = ${Fcritico}</p>
+  `;
+
+  const domande = [
+    {
+      testo: "1. Qual è il valore di F calcolato?",
+      opzioni: [
+        (F - 0.5).toFixed(2),
+        F.toFixed(2),
+        (F + 0.5).toFixed(2),
+        "0.00"
+      ],
+      corretta: 1
+    },
+    {
+      testo: "2. Qual è la conclusione del test?",
+      opzioni: F > Fcritico
+        ? ["Si rifiuta H₀: almeno un gruppo differisce", "Non si rifiuta H₀", "I gruppi sono uguali", "Conclusione non determinabile"]
+        : ["Non si rifiuta H₀", "Si rifiuta H₀: almeno un gruppo differisce", "I gruppi sono uguali", "Conclusione non determinabile"],
+      corretta: 0
+    }
+  ];
+
+  function mostraDomande() {
+    let html = "";
+    domande.forEach((dom, i) => {
+      html += `<div><p>${dom.testo}</p>`;
+      dom.opzioni.forEach((opt, j) => {
+        html += `<label><input type="radio" name="q${i}" value="${j}"> ${opt}</label><br>`;
+      });
+      html += "</div><hr>";
+    });
+    document.getElementById("domande").innerHTML = html;
+  }
+
+  function verificaRisposte() {
+    let corrette = 0;
+    domande.forEach((dom, i) => {
+      const risp = document.querySelector(`input[name="q${i}"]:checked`);
+      if (risp && parseInt(risp.value) === dom.corretta) corrette++;
+    });
+    document.getElementById("risultato").innerHTML =
+      `Hai risposto correttamente a ${corrette} su ${domande.length} domande.`;
+  }
+
+  mostraDomande();
+</script>
+
+</body>
+</html>
