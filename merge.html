@@ -469,14 +469,14 @@
         text: "Quale conclusione si può trarre dal test?",
         options: Math.abs(zCalcolato) > zCritico ? [
           "Si rifiuta H₀: la media dei docenti è significativamente diversa",
+          "Si rifiuta H₀: il campione è rappresentativo della popolazione",
           "Si accetta H₀: la media dei docenti è uguale alla popolazione",
-          "Risultato non significativo",
-          "Non è possibile trarre conclusioni"
+          "Si accetta H₀: non ci sono differenze significative"
         ] : [
-          "Si accetta H₀: la media dei docenti è uguale alla popolazione",
+          "Si accetta H₀: la media dei docenti è uguale alla popolazione", 
+          "Si accetta H₀: non ci sono differenze significative",
           "Si rifiuta H₀: la media dei docenti è significativamente diversa",
-          "Risultato non significativo",
-          "Non è possibile trarre conclusioni"
+          "Si rifiuta H₀: il campione non è rappresentativo"
         ],
         correct: 0,
         test: "Test Z"
@@ -525,14 +525,14 @@
         text: "Qual è la conclusione del test?",
         options: t_calc > t_crit ? [
           "Si rifiuta H₀: la media del Gruppo 1 è significativamente maggiore",
-          "Si accetta H₀: le medie sono uguali",
-          "Risultato non significativo",
-          "Conclusione non possibile"
+          "Si rifiuta H₀: esiste una differenza significativa tra i gruppi", 
+          "Si accetta H₀: le medie sono statisticamente uguali",
+          "Si accetta H₀: non ci sono differenze significative"
         ] : [
-          "Si accetta H₀: le medie sono uguali",
+          "Si accetta H₀: le medie sono statisticamente uguali",
+          "Si accetta H₀: non ci sono differenze significative",
           "Si rifiuta H₀: la media del Gruppo 1 è maggiore",
-          "Risultato non significativo",
-          "Conclusione non possibile"
+          "Si rifiuta H₀: esiste una differenza significativa"
         ],
         correct: 0,
         test: "Test t"
@@ -608,14 +608,14 @@
         text: "Qual è la conclusione del test?",
         options: chi2 > chiCritico ? [
           "Si rifiuta H₀: esiste un'associazione tra reato e disturbo",
+          "Si rifiuta H₀: le variabili sono statisticamente dipendenti",
           "Si accetta H₀: le variabili sono indipendenti",
-          "Risultato non significativo",
-          "Conclusione non possibile"
+          "Si accetta H₀: non c'è associazione significativa"
         ] : [
           "Si accetta H₀: le variabili sono indipendenti",
+          "Si accetta H₀: non c'è associazione significativa", 
           "Si rifiuta H₀: esiste un'associazione tra reato e disturbo",
-          "Risultato non significativo",
-          "Conclusione non possibile"
+          "Si rifiuta H₀: le variabili sono dipendenti"
         ],
         correct: 0,
         test: "Test Chi-quadro"
@@ -708,14 +708,14 @@
         text: "Qual è la conclusione del test t?",
         options: Math.abs(t) > tCritico ? [
           "Si rifiuta H₀: esiste una correlazione significativa",
-          "Si accetta H₀: nessuna correlazione significativa",
-          "Risultato non significativo",
-          "Conclusione non determinabile"
+          "Si rifiuta H₀: le variabili sono linearmente correlate",
+          "Si accetta H₀: nessuna correlazione significativa", 
+          "Si accetta H₀: le variabili sono indipendenti"
         ] : [
           "Si accetta H₀: nessuna correlazione significativa",
+          "Si accetta H₀: le variabili sono indipendenti",
           "Si rifiuta H₀: esiste una correlazione significativa",
-          "Risultato non significativo",
-          "Conclusione non determinabile"
+          "Si rifiuta H₀: le variabili sono correlate"
         ],
         correct: 0,
         test: "Test Correlazione"
