@@ -909,6 +909,17 @@
         test: "Test Correlazione"
       },
       {
+        text: "Qual è il valore di t calcolato per testare la significatività della correlazione?",
+        options: [
+          (t - 0.5).toFixed(2),
+          t.toFixed(2),
+          (t + 0.5).toFixed(2),
+          tCritico.toFixed(2)
+        ],
+        correct: 1,
+        test: "Test Correlazione"
+      },
+      {
         text: "Qual è la conclusione del test t per la correlazione?",
         options: Math.abs(t) > tCritico ? [
           "Si rifiuta H₀: esiste una correlazione significativa",
