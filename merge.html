@@ -467,6 +467,67 @@
     return arr.reduce((sum, val) => sum + Math.pow(val - groupMean, 2), 0);
   }
 
+  // Funzioni per valori critici corretti
+  function getTCritical(df, alpha = 0.05, twoTailed = false) {
+    const criticalValues = {
+      1: twoTailed ? 12.706 : 6.314,
+      2: twoTailed ? 4.303 : 2.920,
+      3: twoTailed ? 3.182 : 2.353,
+      4: twoTailed ? 2.776 : 2.132,
+      5: twoTailed ? 2.571 : 2.015,
+      6: twoTailed ? 2.447 : 1.943,
+      7: twoTailed ? 2.365 : 1.895,
+      8: twoTailed ? 2.306 : 1.860,
+      9: twoTailed ? 2.262 : 1.833,
+      10: twoTailed ? 2.228 : 1.812,
+      15: twoTailed ? 2.131 : 1.753,
+      20: twoTailed ? 2.086 : 1.725,
+      25: twoTailed ? 2.060 : 1.708,
+      30: twoTailed ? 2.042 : 1.697,
+      40: twoTailed ? 2.021 : 1.684,
+      50: twoTailed ? 2.009 : 1.676,
+      100: twoTailed ? 1.984 : 1.660
+    };
+    
+    // Trova il valore più vicino
+    const availableDf = Object.keys(criticalValues).map(Number).sort((a, b) => a - b);
+    const closestDf = availableDf.reduce((prev, curr) => 
+      Math.abs(curr - df) < Math.abs(prev - df) ? curr : prev
+    );
+    
+    return criticalValues[closestDf] || (twoTailed ? 1.96 : 1.645);
+  }
+
+  function getFCritical(df1, df2, alpha = 0.05) {
+    // Tabella semplificata F(α=0.05)
+    const fTable = {
+      "1,5": 6.61, "1,10": 4.96, "1,15": 4.54, "1,20": 4.35, "1,30": 4.17,
+      "2,5": 5.79, "2,10": 4.10, "2,15": 3.68, "2,20": 3.49, "2,30": 3.32,
+      "3,5": 5.41, "3,10": 3.71, "3,15": 3.29, "3,20": 3.10, "3,30": 2.92,
+      "4,5": 5.19, "4,10": 3.48, "4,15": 3.06, "4,20": 2.87, "4,30": 2.69,
+      "5,5": 5.05, "5,10": 3.33, "5,15": 2.90, "5,20": 2.71, "5,30": 2.53
+    };
+    
+    const key = `${df1},${df2}`;
+    if (fTable[key]) return fTable[key];
+    
+    // Trova il valore più vicino
+    const keys = Object.keys(fTable);
+    let bestKey = keys[0];
+    let minDistance = Infinity;
+    
+    for (const k of keys) {
+      const [f1, f2] = k.split(',').map(Number);
+      const distance = Math.abs(f1 - df1) + Math.abs(f2 - df2);
+      if (distance < minDistance) {
+        minDistance = distance;
+        bestKey = k;
+      }
+    }
+    
+    return fTable[bestKey];
+  }
+
   // Test data and questions
   let allQuestions = [];
 
@@ -486,7 +547,7 @@
       <p>La media della popolazione è <strong>μ = ${mu}</strong>, con deviazione standard <strong>σ = ${sigma}</strong>.</p>
       <p>Si vuole verificare se la media del campione è significativamente diversa da quella della popolazione (test bilaterale, α = 0.05).</p>
       <div class="stats-summary">
-        
+        <p><strong>Formula Z:</strong> z = (Ẋ - μ) / (σ / √N)</p>
         <p><strong>Z critico:</strong> ±${zCritico} (test bilaterale, α = 0.05)</p>
       </div>
     `;
@@ -507,7 +568,7 @@
         text: "Quale conclusione si può trarre dal test?",
         options: Math.abs(zCalcolato) > zCritico ? [
           "Si rifiuta H₀: la media dei docenti è significativamente diversa",
-          "Si rifiuta H₀: il campione è rappresentativo della popolazione",
+          "Si rifiuta H₀: il campione non è rappresentativo della popolazione",
           "Si accetta H₀: la media dei docenti è uguale alla popolazione",
           "Si accetta H₀: non ci sono differenze significative"
         ] : [
@@ -534,10 +595,11 @@
     const s1_sq = getRandom(0.5, 2);
     const s2_sq = getRandom(0.5, 2);
 
-    const pooled = ((N1 - 1) * s1_sq + (N2 - 1) * s2_sq) / (N1 + N2 - 2);
+    const df = N1 + N2 - 2; // GRADI DI LIBERTÀ CORRETTI
+    const pooled = ((N1 - 1) * s1_sq + (N2 - 1) * s2_sq) / df;
     const SE_diff = Math.sqrt(pooled * (1 / N1 + 1 / N2));
     const t_calc = +((X1 - X2) / SE_diff).toFixed(2);
-    const t_crit = 1.68;
+    const t_crit = getTCritical(df, 0.05, false); // UNA CODA
 
     document.getElementById('testTData').innerHTML = `
       <h4>Scenario del Test t</h4>
@@ -546,10 +608,10 @@
       <p>Ipotesi: la media del Gruppo 1 è significativamente <strong>maggiore</strong> della media del Gruppo 2.</p>
       <p>Test t per campioni indipendenti con varianze uguali, test a una coda, α = 0.05</p>
       <div class="stats-summary">
-        <p><strong>Varianza pooled:</strong> s²p = ${pooled.toFixed(3)}</p>
-        <p><strong>Errore standard:</strong> SE = ${SE_diff.toFixed(3)}</p>
-        
-        <p><strong>t critico:</strong> ${t_crit} (test a una coda, α = 0.05)</p>
+        <p><strong>Gradi di libertà:</strong> df = N₁ + N₂ - 2 = ${df}</p>
+        <p><strong>Formula varianza pooled:</strong> s²p = [(N₁-1)s₁² + (N₂-1)s₂²] / df</p>
+        <p><strong>Formula t:</strong> t = (X̄₁ - X̄₂) / SE_diff</p>
+        <p><strong>t critico:</strong> ${t_crit.toFixed(3)} (test a una coda, α = 0.05, df = ${df})</p>
       </div>
     `;
 
@@ -560,7 +622,7 @@
           (t_calc - 1).toFixed(2),
           t_calc.toFixed(2),
           (t_calc + 1).toFixed(2),
-          "1.68"
+          t_crit.toFixed(2)
         ],
         correct: 1,
         test: "Test t"
@@ -598,6 +660,8 @@
     const meanTotal = mean(allData);
     const k = 3;
     const N = allData.length;
+    const df1 = k - 1; // GRADI DI LIBERTÀ NUMERATORE
+    const df2 = N - k;  // GRADI DI LIBERTÀ DENOMINATORE
 
     const meanGroups = {
       Insegnanti: mean(insegnanti),
@@ -613,10 +677,10 @@
                 + sumSquares(meccanici, meanGroups.Meccanici)
                 + sumSquares(camionisti, meanGroups.Camionisti)).toFixed(2);
 
-    const MSB = +(SSB / (k - 1)).toFixed(2);
-    const MSW = +(SSW / (N - k)).toFixed(2);
+    const MSB = +(SSB / df1).toFixed(2);
+    const MSW = +(SSW / df2).toFixed(2);
     const F = +(MSB / MSW).toFixed(2);
-    const Fcritico = 3.88;
+    const Fcritico = getFCritical(df1, df2); // VALORE CRITICO CORRETTO
 
     function createTable() {
       let html = "<table><tr><th>#</th><th>Insegnanti</th><th>Meccanici</th><th>Camionisti</th></tr>";
@@ -635,13 +699,10 @@
       <p><strong>Obiettivo:</strong> Verificare se il livello medio di resilienza differisce tra i tre gruppi professionali.</p>
       ${createTable()}
       <div class="stats-summary">
-        <p><strong>Media Totale:</strong> ${meanTotal.toFixed(2)}</p>
-        <p><strong>Media Insegnanti:</strong> ${meanGroups.Insegnanti.toFixed(2)} | 
-           <strong>Meccanici:</strong> ${meanGroups.Meccanici.toFixed(2)} | 
-           <strong>Camionisti:</strong> ${meanGroups.Camionisti.toFixed(2)}</p>
-        <p><strong>SSB (tra gruppi):</strong> ${SSB} | <strong>SSW (entro gruppi):</strong> ${SSW}</p>
-        <p><strong>MSB:</strong> ${MSB} | <strong>MSW:</strong> ${MSW}</p>
-        <p><strong>F critico:</strong> ${Fcritico} (α = 0.05)</p>
+        <p><strong>Gradi di libertà:</strong> df₁ = k - 1 = ${df1}, df₂ = N - k = ${df2}</p>
+        <p><strong>Formula F:</strong> F = MSB / MSW</p>
+        <p><strong>MSB:</strong> SSB / df₁ | <strong>MSW:</strong> SSW / df₂</p>
+        <p><strong>F critico:</strong> ${Fcritico.toFixed(3)} (α = 0.05, df₁ = ${df1}, df₂ = ${df2})</p>
       </div>
     `;
 
@@ -652,7 +713,7 @@
           (F - 0.5).toFixed(2),
           F.toFixed(2),
           (F + 0.5).toFixed(2),
-          "3.88"
+          Fcritico.toFixed(2)
         ],
         correct: 1,
         test: "Test ANOVA"
@@ -706,19 +767,21 @@
       }
     }
     chi2 = +chi2.toFixed(2);
-    const chiCritico = 5.99;
+    const chiCritico = 5.991; // Valore più preciso
 
     let tableHtml = `<table><tr><th></th>`;
     reati.forEach(r => tableHtml += `<th>${r}</th>`);
-    tableHtml += `</tr>`;
+    tableHtml += `<th>Totale</th></tr>`;
     for (let i = 0; i < 2; i++) {
       tableHtml += `<tr><td><strong>${disturbi[i]}</strong></td>`;
       for (let j = 0; j < 3; j++) {
         tableHtml += `<td>${osservati[i][j]}</td>`;
       }
-      tableHtml += `</tr>`;
+      tableHtml += `<td><strong>${totRiga[i]}</strong></td></tr>`;
     }
-    tableHtml += `</table>`;
+    tableHtml += `<tr><td><strong>Totale</strong></td>`;
+    totColonna.forEach(t => tableHtml += `<td><strong>${t}</strong></td>`);
+    tableHtml += `<td><strong>${totTotale}</strong></td></tr></table>`;
 
     document.getElementById('testChiData').innerHTML = `
       <h4>Scenario del Test Chi-quadro</h4>
@@ -726,8 +789,8 @@
       <p>Tabella delle frequenze osservate:</p>
       ${tableHtml}
       <div class="stats-summary">
-        <p><strong>Gradi di libertà:</strong> (2-1) × (3-1) = 2</p>
-        
+        <p><strong>Gradi di libertà:</strong> df = (righe-1) × (colonne-1) = 2</p>
+        <p><strong>Formula χ²:</strong> Σ[(Fo - Fe)² / Fe]</p>
         <p><strong>χ² critico:</strong> ${chiCritico} (α = 0.05, df = 2)</p>
       </div>
     `;
@@ -739,7 +802,7 @@
           (chi2 - 1).toFixed(2),
           chi2.toFixed(2),
           (chi2 + 1).toFixed(2),
-          "5.99"
+          "5.991"
         ],
         correct: 1,
         test: "Test Chi-quadro"
@@ -806,8 +869,9 @@
     const sigmaX = +(Math.sqrt(sommaX2 / n)).toFixed(2);
     const sigmaY = +(Math.sqrt(sommaY2 / n)).toFixed(2);
     const r = +(sommaXY / Math.sqrt(sommaX2 * sommaY2)).toFixed(2);
-    const t = +(r * Math.sqrt(n - 2) / Math.sqrt(1 - r * r)).toFixed(2);
-    const tCritico = 3.182;
+    const df = n - 2; // GRADI DI LIBERTÀ CORRETTI
+    const t = +(r * Math.sqrt(df) / Math.sqrt(1 - r * r)).toFixed(2);
+    const tCritico = getTCritical(df, 0.05, true); // TEST BILATERALE
 
     const correlationTable = `
       <table>
@@ -825,9 +889,10 @@
       ${correlationTable}
       <div class="stats-summary">
         <p><strong>X̄</strong> = ${mediaX.toFixed(2)} | <strong>Ȳ</strong> = ${mediaY.toFixed(2)}</p>
-        <p><strong>σₓ</strong> = ${sigmaX} | <strong>σᵧ</strong> = ${sigmaY}</p>
-          <p>QUESTO è <strong>t calcolato</strong> = ${t} VERIFICA</p>
-        <p><strong>t critico</strong> = ±${tCritico} (test bilaterale, α = 0.05, df = 3)</p>
+        <p><strong>Formula r:</strong> r = Σ(X−X̄)(Y−Ȳ) / √[Σ(X−X̄)²Σ(Y−Ȳ)²]</p>
+        <p><strong>Formula t:</strong> t = r√(n-2) / √(1-r²)</p>
+        <p><strong>Gradi di libertà:</strong> df = n - 2 = ${df}</p>
+        <p><strong>t critico:</strong> ±${tCritico.toFixed(3)} (test bilaterale, α = 0.05, df = ${df})</p>
       </div>
     `;
 
@@ -844,7 +909,7 @@
         test: "Test Correlazione"
       },
       {
-        text: "Qual è la conclusione del test t?",
+        text: "Qual è la conclusione del test t per la correlazione?",
         options: Math.abs(t) > tCritico ? [
           "Si rifiuta H₀: esiste una correlazione significativa",
           "Si rifiuta H₀: le variabili sono linearmente correlate",
