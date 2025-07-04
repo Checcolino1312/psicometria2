@@ -700,6 +700,8 @@
       ${createTable()}
       <div class="stats-summary">
         <p><strong>Gradi di libertà:</strong> df₁ = k - 1 = ${df1}, df₂ = N - k = ${df2}</p>
+        <p><strong>SSB (Somma quadrati tra gruppi):</strong> ${SSB}</p>
+        <p><strong>SSW (Somma quadrati entro gruppi):</strong> ${SSW}</p>
         <p><strong>Formula F:</strong> F = MSB / MSW</p>
         <p><strong>MSB:</strong> SSB / df₁ | <strong>MSW:</strong> SSW / df₂</p>
         <p><strong>F critico:</strong> ${Fcritico.toFixed(3)} (α = 0.05, df₁ = ${df1}, df₂ = ${df2})</p>
