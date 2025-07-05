@@ -1033,6 +1033,8 @@
 
     // Calcola correlazione
     const r = sommaXY / Math.sqrt(sommaX2 * sommaY2);
+    const ds1 = Math.sqrt(sommaX2/n);
+    const ds2 = Math.sqrt(sommaY2/n);
     const df = n - 2;
     const t = (r * Math.sqrt(df)) / Math.sqrt(1 - r * r);
     const tCritico = getTCritical(df, 0.05, true); // Test bilaterale
@@ -1059,6 +1061,8 @@
         <p><strong>Formula t:</strong> t = r√(n-2) / √(1-r²)</p>
         <p><strong>Gradi di libertà:</strong> df = n - 2 = ${df}</p>
         <p><strong>t critico:</strong> ±${tCritico.toFixed(3)} (test bilaterale, α = 0.05)</p>
+        <p><strong>ds1:</strong> ${ds1.toFixed(2)} </p>
+        <p><strong>ds2:</strong> ${ds2.toFixed(2)} </p>
       </div>
     `;
 
