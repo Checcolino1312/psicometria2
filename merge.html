@@ -667,12 +667,24 @@
     displayQuestions('testTQuestions', questions, 2);
   }
 
-  // Test t appaiati (basato sul secondo file)
+  // Test t appaiati (completamente dinamico)
   function initTestTPaired() {
-    // Dati fissi dal secondo file, ma con variazioni casuali
-    const n = 7;
-    const padri = [3, 2, 3, 2, 2, 4, 4];
-    const figli = [4, 5, 4, 5, 4, 4, 5];
+    // Genera dati casuali per coppie padre-figlio
+    const n = getInt(6, 8); // Tra 6 e 8 coppie
+    const padri = [];
+    const figli = [];
+    
+    // Genera dati con una tendenza realistica (figli generalmente più creativi)
+    for (let i = 0; i < n; i++) {
+      const padre = getInt(2, 5); // Creatività padri: 2-5
+      // I figli tendono ad essere più creativi, ma con variabilità
+      const delta = Math.random() < 0.7 ? getInt(0, 2) : getInt(-1, 1); // 70% chance di essere più creativi
+      const figlio = Math.max(1, Math.min(6, padre + delta)); // Limiti realistici 1-6
+      
+      padri.push(padre);
+      figli.push(figlio);
+    }
+    
     const differenze = figli.map((f, i) => f - padri[i]);
     
     const mediaDiff = mean(differenze);
@@ -682,7 +694,7 @@
     const df = n - 1;
     const t_crit = getTCritical(df, 0.05, false);
 
-    // Crea tabella
+    // Crea tabella dinamica
     let tableRows = '';
     for (let i = 0; i < n; i++) {
       tableRows += `
@@ -690,14 +702,28 @@
           <td>${i + 1}</td>
           <td>${padri[i]}</td>
           <td>${figli[i]}</td>
-          <td>${differenze[i]}</td>
+          <td>${differenze[i] >= 0 ? '+' + differenze[i] : differenze[i]}</td>
         </tr>
       `;
     }
 
+    // Aggiungi riga con somme
+    const sommaPadri = padri.reduce((a, b) => a + b, 0);
+    const sommaFigli = figli.reduce((a, b) => a + b, 0);
+    const sommaDiff = differenze.reduce((a, b) => a + b, 0);
+    
+    tableRows += `
+      <tr style="background: #e3f2fd; font-weight: bold;">
+        <td>Σ</td>
+        <td>${sommaPadri}</td>
+        <td>${sommaFigli}</td>
+        <td>${sommaDiff >= 0 ? '+' + sommaDiff : sommaDiff}</td>
+      </tr>
+    `;
+
     const pairedTable = `
       <table>
-        <tr><th>#</th><th>Padri</th><th>Figli</th><th>Differenza (D)</th></tr>
+        <tr><th>Coppia</th><th>Padri</th><th>Figli</th><th>Differenza (D)</th></tr>
         ${tableRows}
       </table>
     `;
@@ -705,10 +731,12 @@
     document.getElementById('testTPairedData').innerHTML = `
       <h4>Scenario del Test t per campioni appaiati</h4>
       <p><strong>Obiettivo:</strong> Verificare se i figli hanno un livello medio di creatività maggiore rispetto ai padri.</p>
-      <p><strong>Ipotesi:</strong> H₁: μD > 0 (i figli sono più creativi dei padri)</p>
+      <p><strong>Ipotesi:</strong> H₀: μD = 0 vs H₁: μD > 0 (i figli sono più creativi dei padri)</p>
+      <p>Analisi delle coppie padre-figlio sulla creatività (scala 1-6):</p>
       ${pairedTable}
       <div class="stats-summary">
-        <p><strong>Media delle differenze:</strong> D̄ = ${mediaDiff.toFixed(2)}</p>
+        <p><strong>Numero di coppie:</strong> n = ${n}</p>
+        <p><strong>Media delle differenze:</strong> D̄ = ${mediaDiff.toFixed(3)}</p>
         <p><strong>Deviazione standard delle differenze:</strong> sD = ${devStandardDiff.toFixed(3)}</p>
         <p><strong>Errore standard:</strong> SE = sD / √n = ${errorStandardDiff.toFixed(3)}</p>
         <p><strong>Formula t:</strong> t = D̄ / SE</p>
@@ -721,10 +749,10 @@
       {
         text: "Qual è il valore di t calcolato?",
         options: [
-          "2.71",
+          (t_calc - 0.5).toFixed(2),
           t_calc.toFixed(2),
-          "1.13",
-          "4.02"
+          (t_calc + 0.5).toFixed(2),
+          t_crit.toFixed(2)
         ],
         correct: 1,
         test: "Test t appaiati"
@@ -732,14 +760,14 @@
       {
         text: "Qual è la conclusione del test?",
         options: t_calc > t_crit ? [
-          "Si rifiuta H₀: i figli sono più creativi dei padri",
-          "Non si rifiuta H₀: non c'è differenza significativa",
-          "I figli sono meno creativi",
+          "Si rifiuta H₀: i figli sono significativamente più creativi dei padri",
+          "Non si rifiuta H₀: non c'è differenza significativa nella creatività",
+          "I figli sono meno creativi dei padri",
           "Il test non è valido"
         ] : [
-          "Non si rifiuta H₀: non c'è differenza significativa",
-          "Si rifiuta H₀: i figli sono più creativi dei padri",
-          "I figli sono meno creativi",
+          "Non si rifiuta H₀: non c'è differenza significativa nella creatività",
+          "Si rifiuta H₀: i figli sono significativamente più creativi dei padri",
+          "I figli sono meno creativi dei padri",
           "Il test non è valido"
         ],
         correct: 0,
