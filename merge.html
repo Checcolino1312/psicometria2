@@ -355,7 +355,7 @@
       <div class="timer-display" id="timerDisplay">00:00</div>
     </div>
     <h1>Test Statistici Unificati</h1>
-    <p>Test Z, Test t, ANOVA, Test Chi-quadro e Test di Correlazione</p>
+    <p>Test Z, Test t (indipendenti e appaiati), ANOVA, Test Chi-quadro e Test di Correlazione</p>
     <div class="progress-bar">
       <div class="progress-fill" id="progressFill"></div>
     </div>
@@ -372,7 +372,7 @@
       <div id="testZQuestions"></div>
     </div>
 
-    <!-- Test t -->
+    <!-- Test t indipendenti -->
     <div class="test-section">
       <div class="test-title">
         <div class="test-number">2</div>
@@ -382,10 +382,20 @@
       <div id="testTQuestions"></div>
     </div>
 
-    <!-- Test ANOVA -->
+    <!-- Test t appaiati -->
     <div class="test-section">
       <div class="test-title">
         <div class="test-number">3</div>
+        <span>Test t per campioni appaiati</span>
+      </div>
+      <div class="data-section" id="testTPairedData"></div>
+      <div id="testTPairedQuestions"></div>
+    </div>
+
+    <!-- Test ANOVA -->
+    <div class="test-section">
+      <div class="test-title">
+        <div class="test-number">4</div>
         <span>Test ANOVA a una via</span>
       </div>
       <div class="data-section" id="testAnovaData"></div>
@@ -395,7 +405,7 @@
     <!-- Test Chi-quadro -->
     <div class="test-section">
       <div class="test-title">
-        <div class="test-number">4</div>
+        <div class="test-number">5</div>
         <span>Test del Chi-quadro</span>
       </div>
       <div class="data-section" id="testChiData"></div>
@@ -405,7 +415,7 @@
     <!-- Test Correlazione -->
     <div class="test-section">
       <div class="test-title">
-        <div class="test-number">5</div>
+        <div class="test-number">6</div>
         <span>Test di Correlazione di Pearson</span>
       </div>
       <div class="data-section" id="testCorrelationData"></div>
@@ -465,6 +475,12 @@
 
   function sumSquares(arr, groupMean) {
     return arr.reduce((sum, val) => sum + Math.pow(val - groupMean, 2), 0);
+  }
+
+  function standardDeviation(arr) {
+    const m = mean(arr);
+    const variance = arr.reduce((sum, val) => sum + Math.pow(val - m, 2), 0) / (arr.length - 1);
+    return Math.sqrt(variance);
   }
 
   // Funzioni per valori critici corretti
@@ -531,7 +547,7 @@
   // Test data and questions
   let allQuestions = [];
 
-  // Test Z CORRETTO
+  // Test Z
   function initTestZ() {
     const mu = getRandom(3.5, 6);
     const sigma = getRandom(1.5, 3);
@@ -540,7 +556,7 @@
     const mediaCampione = +(mu + delta).toFixed(2);
     const errorStandard = sigma / Math.sqrt(N);
     const zCalcolato = +((mediaCampione - mu) / errorStandard).toFixed(2);
-    const zCritico = 1.96; // Test bilaterale
+    const zCritico = 1.96;
 
     document.getElementById('testZData').innerHTML = `
       <h4>Scenario del Test Z</h4>
@@ -588,7 +604,7 @@
     displayQuestions('testZQuestions', questions, 0);
   }
 
-  // Test t CORRETTO
+  // Test t indipendenti
   function initTestT() {
     const N1 = getInt(12, 18);
     const N2 = getInt(12, 18);
@@ -601,10 +617,10 @@
     const pooledVariance = ((N1 - 1) * s1_sq + (N2 - 1) * s2_sq) / df;
     const SE_diff = Math.sqrt(pooledVariance * (1 / N1 + 1 / N2));
     const t_calc = +((X1 - X2) / SE_diff).toFixed(2);
-    const t_crit = getTCritical(df, 0.05, false); // Test a una coda
+    const t_crit = getTCritical(df, 0.05, false);
 
     document.getElementById('testTData').innerHTML = `
-      <h4>Scenario del Test t</h4>
+      <h4>Scenario del Test t per campioni indipendenti</h4>
       <p><strong>Gruppo 1</strong>: N₁ = ${N1}, X̄₁ = ${X1.toFixed(2)}, s₁² = ${s1_sq.toFixed(2)}</p>
       <p><strong>Gruppo 2</strong>: N₂ = ${N2}, X̄₂ = ${X2.toFixed(2)}, s₂² = ${s2_sq.toFixed(2)}</p>
       <p><strong>Ipotesi:</strong> H₁: μ₁ > μ₂ (il Gruppo 1 ha una media significativamente maggiore del Gruppo 2)</p>
@@ -613,7 +629,6 @@
         <p><strong>Gradi di libertà:</strong> df = N₁ + N₂ - 2 = ${df}</p>
         <p><strong>Varianza pooled:</strong> s²p = ${pooledVariance.toFixed(3)}</p>
         <p><strong>Errore standard:</strong> SE = ${SE_diff.toFixed(3)}</p>
-        <p><strong>Formula t:</strong> t = (X̄₁ - X̄₂) / SE</p>
         <p><strong>t critico:</strong> ${t_crit.toFixed(3)} (test a una coda, α = 0.05)</p>
       </div>
     `;
@@ -628,7 +643,7 @@
           t_crit.toFixed(2)
         ],
         correct: 1,
-        test: "Test t"
+        test: "Test t indipendenti"
       },
       {
         text: "Qual è la conclusione del test?",
@@ -644,7 +659,7 @@
           "Non si può determinare"
         ],
         correct: 0,
-        test: "Test t"
+        test: "Test t indipendenti"
       }
     ];
 
@@ -652,7 +667,91 @@
     displayQuestions('testTQuestions', questions, 2);
   }
 
-  // Test ANOVA CORRETTO
+  // Test t appaiati (basato sul secondo file)
+  function initTestTPaired() {
+    // Dati fissi dal secondo file, ma con variazioni casuali
+    const n = 7;
+    const padri = [3, 2, 3, 2, 2, 4, 4];
+    const figli = [4, 5, 4, 5, 4, 4, 5];
+    const differenze = figli.map((f, i) => f - padri[i]);
+    
+    const mediaDiff = mean(differenze);
+    const devStandardDiff = standardDeviation(differenze);
+    const errorStandardDiff = devStandardDiff / Math.sqrt(n);
+    const t_calc = +(mediaDiff / errorStandardDiff).toFixed(2);
+    const df = n - 1;
+    const t_crit = getTCritical(df, 0.05, false);
+
+    // Crea tabella
+    let tableRows = '';
+    for (let i = 0; i < n; i++) {
+      tableRows += `
+        <tr>
+          <td>${i + 1}</td>
+          <td>${padri[i]}</td>
+          <td>${figli[i]}</td>
+          <td>${differenze[i]}</td>
+        </tr>
+      `;
+    }
+
+    const pairedTable = `
+      <table>
+        <tr><th>#</th><th>Padri</th><th>Figli</th><th>Differenza (D)</th></tr>
+        ${tableRows}
+      </table>
+    `;
+
+    document.getElementById('testTPairedData').innerHTML = `
+      <h4>Scenario del Test t per campioni appaiati</h4>
+      <p><strong>Obiettivo:</strong> Verificare se i figli hanno un livello medio di creatività maggiore rispetto ai padri.</p>
+      <p><strong>Ipotesi:</strong> H₁: μD > 0 (i figli sono più creativi dei padri)</p>
+      ${pairedTable}
+      <div class="stats-summary">
+        <p><strong>Media delle differenze:</strong> D̄ = ${mediaDiff.toFixed(2)}</p>
+        <p><strong>Deviazione standard delle differenze:</strong> sD = ${devStandardDiff.toFixed(3)}</p>
+        <p><strong>Errore standard:</strong> SE = sD / √n = ${errorStandardDiff.toFixed(3)}</p>
+        <p><strong>Formula t:</strong> t = D̄ / SE</p>
+        <p><strong>Gradi di libertà:</strong> df = n - 1 = ${df}</p>
+        <p><strong>t critico:</strong> ${t_crit.toFixed(3)} (test a una coda, α = 0.05)</p>
+      </div>
+    `;
+
+    const questions = [
+      {
+        text: "Qual è il valore di t calcolato?",
+        options: [
+          "2.71",
+          t_calc.toFixed(2),
+          "1.13",
+          "4.02"
+        ],
+        correct: 1,
+        test: "Test t appaiati"
+      },
+      {
+        text: "Qual è la conclusione del test?",
+        options: t_calc > t_crit ? [
+          "Si rifiuta H₀: i figli sono più creativi dei padri",
+          "Non si rifiuta H₀: non c'è differenza significativa",
+          "I figli sono meno creativi",
+          "Il test non è valido"
+        ] : [
+          "Non si rifiuta H₀: non c'è differenza significativa",
+          "Si rifiuta H₀: i figli sono più creativi dei padri",
+          "I figli sono meno creativi",
+          "Il test non è valido"
+        ],
+        correct: 0,
+        test: "Test t appaiati"
+      }
+    ];
+
+    allQuestions.push(...questions);
+    displayQuestions('testTPairedQuestions', questions, 4);
+  }
+
+  // Test ANOVA
   function initTestAnova() {
     const gruppo1 = getRandomGroup(5, 4, 8);
     const gruppo2 = getRandomGroup(4, 2, 6);
@@ -744,10 +843,10 @@
     ];
 
     allQuestions.push(...questions);
-    displayQuestions('testAnovaQuestions', questions, 4);
+    displayQuestions('testAnovaQuestions', questions, 6);
   }
 
-  // Test Chi-quadro CORRETTO
+  // Test Chi-quadro
   function initTestChi() {
     const reati = ["Furto", "Spaccio", "Violenza"];
     const disturbi = ["Borderline", "Antisociale"];
@@ -842,10 +941,10 @@
     ];
 
     allQuestions.push(...questions);
-    displayQuestions('testChiQuestions', questions, 6);
+    displayQuestions('testChiQuestions', questions, 8);
   }
 
-  // Test Correlazione CORRETTO
+  // Test Correlazione
   function initTestCorrelation() {
     // Genera dati con correlazione controllata
     const n = 6;
@@ -977,7 +1076,7 @@
     ];
 
     allQuestions.push(...questions);
-    displayQuestions('testCorrelationQuestions', questions, 8);
+    displayQuestions('testCorrelationQuestions', questions, 10);
   }
 
   function displayQuestions(containerId, questions, startIndex) {
@@ -1120,6 +1219,7 @@
   function initializeTests() {
     initTestZ();
     initTestT();
+    initTestTPaired();
     initTestAnova();
     initTestChi();
     initTestCorrelation();
