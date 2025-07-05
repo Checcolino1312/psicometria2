@@ -531,23 +531,25 @@
   // Test data and questions
   let allQuestions = [];
 
-  // Test Z
+  // Test Z CORRETTO
   function initTestZ() {
     const mu = getRandom(3.5, 6);
     const sigma = getRandom(1.5, 3);
     const N = Math.floor(Math.random() * 26) + 25;
     const delta = getRandom(0.5, 1.5) * (Math.random() < 0.5 ? -1 : 1);
     const mediaCampione = +(mu + delta).toFixed(2);
-    const zCalcolato = +((mediaCampione - mu) / (sigma / Math.sqrt(N))).toFixed(2);
-    const zCritico = 1.96;
+    const errorStandard = sigma / Math.sqrt(N);
+    const zCalcolato = +((mediaCampione - mu) / errorStandard).toFixed(2);
+    const zCritico = 1.96; // Test bilaterale
 
     document.getElementById('testZData').innerHTML = `
       <h4>Scenario del Test Z</h4>
-      <p>Un gruppo di docenti (<strong>N = ${N}</strong>) ha riportato una media di soddisfazione lavorativa di <strong>Ẋ = ${mediaCampione}</strong>.</p>
+      <p>Un gruppo di docenti (<strong>N = ${N}</strong>) ha riportato una media di soddisfazione lavorativa di <strong>X̄ = ${mediaCampione}</strong>.</p>
       <p>La media della popolazione è <strong>μ = ${mu}</strong>, con deviazione standard <strong>σ = ${sigma}</strong>.</p>
       <p>Si vuole verificare se la media del campione è significativamente diversa da quella della popolazione (test bilaterale, α = 0.05).</p>
       <div class="stats-summary">
-        <p><strong>Formula Z:</strong> z = (Ẋ - μ) / (σ / √N)</p>
+        <p><strong>Formula Z:</strong> z = (X̄ - μ) / (σ / √N)</p>
+        <p><strong>Errore standard:</strong> σ / √N = ${errorStandard.toFixed(3)}</p>
         <p><strong>Z critico:</strong> ±${zCritico} (test bilaterale, α = 0.05)</p>
       </div>
     `;
@@ -556,9 +558,9 @@
       {
         text: "Qual è il valore z calcolato?",
         options: [
-          (zCalcolato - 1).toFixed(2),
+          (zCalcolato - 0.5).toFixed(2),
           zCalcolato.toFixed(2),
-          (zCalcolato + 1).toFixed(2),
+          (zCalcolato + 0.5).toFixed(2),
           "1.96"
         ],
         correct: 1,
@@ -567,15 +569,15 @@
       {
         text: "Quale conclusione si può trarre dal test?",
         options: Math.abs(zCalcolato) > zCritico ? [
-          "Si rifiuta H₀: la media dei docenti è significativamente diversa",
-          "Si rifiuta H₀: il campione non è rappresentativo della popolazione",
-          "Si accetta H₀: la media dei docenti è uguale alla popolazione",
-          "Si accetta H₀: non ci sono differenze significative"
+          "Si rifiuta H₀: la media dei docenti è significativamente diversa dalla popolazione",
+          "Si accetta H₀: la media dei docenti non differisce significativamente dalla popolazione",
+          "Non si può concludere nulla",
+          "Il test non è valido"
         ] : [
-          "Si accetta H₀: la media dei docenti è uguale alla popolazione", 
-          "Si accetta H₀: non ci sono differenze significative",
-          "Si rifiuta H₀: la media dei docenti è significativamente diversa",
-          "Si rifiuta H₀: il campione non è rappresentativo"
+          "Si accetta H₀: la media dei docenti non differisce significativamente dalla popolazione",
+          "Si rifiuta H₀: la media dei docenti è significativamente diversa dalla popolazione",
+          "Non si può concludere nulla",
+          "Il test non è valido"
         ],
         correct: 0,
         test: "Test Z"
@@ -586,32 +588,33 @@
     displayQuestions('testZQuestions', questions, 0);
   }
 
-  // Test t
+  // Test t CORRETTO
   function initTestT() {
-    const N1 = Math.floor(getRandom(10, 20));
-    const N2 = Math.floor(getRandom(10, 20));
+    const N1 = getInt(12, 18);
+    const N2 = getInt(12, 18);
     const X1 = getRandom(4.5, 6);
-    const X2 = getRandom(3, X1 - 0.1);
-    const s1_sq = getRandom(0.5, 2);
-    const s2_sq = getRandom(0.5, 2);
+    const X2 = getRandom(3, X1 - 0.3);
+    const s1_sq = getRandom(0.8, 2.2);
+    const s2_sq = getRandom(0.8, 2.2);
 
-    const df = N1 + N2 - 2; // GRADI DI LIBERTÀ CORRETTI
-    const pooled = ((N1 - 1) * s1_sq + (N2 - 1) * s2_sq) / df;
-    const SE_diff = Math.sqrt(pooled * (1 / N1 + 1 / N2));
+    const df = N1 + N2 - 2;
+    const pooledVariance = ((N1 - 1) * s1_sq + (N2 - 1) * s2_sq) / df;
+    const SE_diff = Math.sqrt(pooledVariance * (1 / N1 + 1 / N2));
     const t_calc = +((X1 - X2) / SE_diff).toFixed(2);
-    const t_crit = getTCritical(df, 0.05, false); // UNA CODA
+    const t_crit = getTCritical(df, 0.05, false); // Test a una coda
 
     document.getElementById('testTData').innerHTML = `
       <h4>Scenario del Test t</h4>
-      <p><strong>Gruppo 1 (es. donne)</strong>: N = ${N1}, media = ${X1.toFixed(2)}, varianza = ${s1_sq.toFixed(2)}</p>
-      <p><strong>Gruppo 2 (es. uomini)</strong>: N = ${N2}, media = ${X2.toFixed(2)}, varianza = ${s2_sq.toFixed(2)}</p>
-      <p>Ipotesi: la media del Gruppo 1 è significativamente <strong>maggiore</strong> della media del Gruppo 2.</p>
-      <p>Test t per campioni indipendenti con varianze uguali, test a una coda, α = 0.05</p>
+      <p><strong>Gruppo 1</strong>: N₁ = ${N1}, X̄₁ = ${X1.toFixed(2)}, s₁² = ${s1_sq.toFixed(2)}</p>
+      <p><strong>Gruppo 2</strong>: N₂ = ${N2}, X̄₂ = ${X2.toFixed(2)}, s₂² = ${s2_sq.toFixed(2)}</p>
+      <p><strong>Ipotesi:</strong> H₁: μ₁ > μ₂ (il Gruppo 1 ha una media significativamente maggiore del Gruppo 2)</p>
+      <p>Test t per campioni indipendenti, varianze omogenee, test a una coda (α = 0.05)</p>
       <div class="stats-summary">
         <p><strong>Gradi di libertà:</strong> df = N₁ + N₂ - 2 = ${df}</p>
-        <p><strong>Formula varianza pooled:</strong> s²p = [(N₁-1)s₁² + (N₂-1)s₂²] / df</p>
-        <p><strong>Formula t:</strong> t = (X̄₁ - X̄₂) / SE_diff</p>
-        <p><strong>t critico:</strong> ${t_crit.toFixed(3)} (test a una coda, α = 0.05, df = ${df})</p>
+        <p><strong>Varianza pooled:</strong> s²p = ${pooledVariance.toFixed(3)}</p>
+        <p><strong>Errore standard:</strong> SE = ${SE_diff.toFixed(3)}</p>
+        <p><strong>Formula t:</strong> t = (X̄₁ - X̄₂) / SE</p>
+        <p><strong>t critico:</strong> ${t_crit.toFixed(3)} (test a una coda, α = 0.05)</p>
       </div>
     `;
 
@@ -619,9 +622,9 @@
       {
         text: "Qual è il valore t calcolato?",
         options: [
-          (t_calc - 1).toFixed(2),
+          (t_calc - 0.5).toFixed(2),
           t_calc.toFixed(2),
-          (t_calc + 1).toFixed(2),
+          (t_calc + 0.5).toFixed(2),
           t_crit.toFixed(2)
         ],
         correct: 1,
@@ -630,15 +633,15 @@
       {
         text: "Qual è la conclusione del test?",
         options: t_calc > t_crit ? [
-          "Si rifiuta H₀: la media del Gruppo 1 è significativamente maggiore",
-          "Si rifiuta H₀: esiste una differenza significativa tra i gruppi", 
-          "Si accetta H₀: le medie sono statisticamente uguali",
-          "Si accetta H₀: non ci sono differenze significative"
+          "Si rifiuta H₀: il Gruppo 1 ha una media significativamente maggiore del Gruppo 2",
+          "Si accetta H₀: non c'è differenza significativa tra i due gruppi",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ] : [
-          "Si accetta H₀: le medie sono statisticamente uguali",
-          "Si accetta H₀: non ci sono differenze significative",
-          "Si rifiuta H₀: la media del Gruppo 1 è maggiore",
-          "Si rifiuta H₀: esiste una differenza significativa"
+          "Si accetta H₀: non c'è differenza significativa tra i due gruppi",
+          "Si rifiuta H₀: il Gruppo 1 ha una media significativamente maggiore del Gruppo 2",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ],
         correct: 0,
         test: "Test t"
@@ -649,62 +652,64 @@
     displayQuestions('testTQuestions', questions, 2);
   }
 
-  // Test ANOVA
+  // Test ANOVA CORRETTO
   function initTestAnova() {
-    const insegnanti = getRandomGroup(5, 3, 8);
-    const meccanici = getRandomGroup(4, 2, 6);
-    const camionisti = getRandomGroup(4, 3, 6);
+    const gruppo1 = getRandomGroup(5, 4, 8);
+    const gruppo2 = getRandomGroup(4, 2, 6);
+    const gruppo3 = getRandomGroup(4, 3, 7);
 
-    const allData = insegnanti.concat(meccanici, camionisti);
+    const allData = gruppo1.concat(gruppo2, gruppo3);
+    const N = allData.length;
+    const k = 3;
+    const df1 = k - 1;
+    const df2 = N - k;
 
     const meanTotal = mean(allData);
-    const k = 3;
-    const N = allData.length;
-    const df1 = k - 1; // GRADI DI LIBERTÀ NUMERATORE
-    const df2 = N - k;  // GRADI DI LIBERTÀ DENOMINATORE
+    const mean1 = mean(gruppo1);
+    const mean2 = mean(gruppo2);
+    const mean3 = mean(gruppo3);
 
-    const meanGroups = {
-      Insegnanti: mean(insegnanti),
-      Meccanici: mean(meccanici),
-      Camionisti: mean(camionisti)
-    };
+    // SSB (Between groups)
+    const SSB = gruppo1.length * Math.pow(mean1 - meanTotal, 2) +
+                gruppo2.length * Math.pow(mean2 - meanTotal, 2) +
+                gruppo3.length * Math.pow(mean3 - meanTotal, 2);
 
-    const SSB = +(insegnanti.length * Math.pow(meanGroups.Insegnanti - meanTotal, 2)
-                + meccanici.length * Math.pow(meanGroups.Meccanici - meanTotal, 2)
-                + camionisti.length * Math.pow(meanGroups.Camionisti - meanTotal, 2)).toFixed(2);
+    // SSW (Within groups)
+    const SSW = sumSquares(gruppo1, mean1) + 
+                sumSquares(gruppo2, mean2) + 
+                sumSquares(gruppo3, mean3);
 
-    const SSW = +(sumSquares(insegnanti, meanGroups.Insegnanti)
-                + sumSquares(meccanici, meanGroups.Meccanici)
-                + sumSquares(camionisti, meanGroups.Camionisti)).toFixed(2);
-
-    const MSB = +(SSB / df1).toFixed(2);
-    const MSW = +(SSW / df2).toFixed(2);
-    const F = +(MSB / MSW).toFixed(2);
-    const Fcritico = getFCritical(df1, df2); // VALORE CRITICO CORRETTO
+    const MSB = SSB / df1;
+    const MSW = SSW / df2;
+    const F_calc = +(MSB / MSW).toFixed(2);
+    const F_crit = getFCritical(df1, df2);
 
     function createTable() {
-      let html = "<table><tr><th>#</th><th>Insegnanti</th><th>Meccanici</th><th>Camionisti</th></tr>";
+      let html = "<table><tr><th>#</th><th>Gruppo 1</th><th>Gruppo 2</th><th>Gruppo 3</th></tr>";
       for (let i = 0; i < 5; i++) {
         html += "<tr><td>" + (i+1) + "</td>";
-        html += "<td>" + (insegnanti[i] ?? "") + "</td>";
-        html += "<td>" + (meccanici[i] ?? "") + "</td>";
-        html += "<td>" + (camionisti[i] ?? "") + "</td></tr>";
+        html += "<td>" + (gruppo1[i] ?? "-") + "</td>";
+        html += "<td>" + (gruppo2[i] ?? "-") + "</td>";
+        html += "<td>" + (gruppo3[i] ?? "-") + "</td></tr>";
       }
+      html += `<tr style="background: #e3f2fd;"><td><strong>Media</strong></td>
+               <td><strong>${mean1.toFixed(2)}</strong></td>
+               <td><strong>${mean2.toFixed(2)}</strong></td>
+               <td><strong>${mean3.toFixed(2)}</strong></td></tr>`;
       html += "</table>";
       return html;
     }
 
     document.getElementById('testAnovaData').innerHTML = `
       <h4>Scenario del Test ANOVA</h4>
-      <p><strong>Obiettivo:</strong> Verificare se il livello medio di resilienza differisce tra i tre gruppi professionali.</p>
+      <p><strong>Obiettivo:</strong> Verificare se il livello medio di resilienza differisce tra i tre gruppi.</p>
       ${createTable()}
       <div class="stats-summary">
-        <p><strong>Gradi di libertà:</strong> df₁ = k - 1 = ${df1}, df₂ = N - k = ${df2}</p>
-        <p><strong>SSB (Somma quadrati tra gruppi):</strong> ${SSB}</p>
-        <p><strong>SSW (Somma quadrati entro gruppi):</strong> ${SSW}</p>
-        <p><strong>Formula F:</strong> F = MSB / MSW</p>
-        <p><strong>MSB:</strong> SSB / df₁ | <strong>MSW:</strong> SSW / df₂</p>
-        <p><strong>F critico:</strong> ${Fcritico.toFixed(3)} (α = 0.05, df₁ = ${df1}, df₂ = ${df2})</p>
+        <p><strong>Gradi di libertà:</strong> df₁ = ${df1}, df₂ = ${df2}</p>
+        <p><strong>SSB (somma quadrati tra gruppi):</strong> ${SSB.toFixed(2)}</p>
+        <p><strong>SSW (somma quadrati entro gruppi):</strong> ${SSW.toFixed(2)}</p>
+        <p><strong>Formula F:</strong> F = MSB / MSW = (SSB/df₁) / (SSW/df₂)</p>
+        <p><strong>F critico:</strong> ${F_crit.toFixed(3)} (α = 0.05)</p>
       </div>
     `;
 
@@ -712,26 +717,26 @@
       {
         text: "Qual è il valore di F calcolato?",
         options: [
-          (F - 0.5).toFixed(2),
-          F.toFixed(2),
-          (F + 0.5).toFixed(2),
-          Fcritico.toFixed(2)
+          (F_calc - 0.5).toFixed(2),
+          F_calc.toFixed(2),
+          (F_calc + 0.5).toFixed(2),
+          F_crit.toFixed(2)
         ],
         correct: 1,
         test: "Test ANOVA"
       },
       {
         text: "Qual è la conclusione del test ANOVA?",
-        options: F > Fcritico ? [
-          "Si rifiuta H₀: almeno un gruppo differisce significativamente",
-          "Si rifiuta H₀: esistono differenze tra i gruppi",
-          "Si accetta H₀: tutti i gruppi hanno medie uguali",
-          "Si accetta H₀: non ci sono differenze significative"
+        options: F_calc > F_crit ? [
+          "Si rifiuta H₀: almeno uno dei gruppi differisce significativamente dagli altri",
+          "Si accetta H₀: non ci sono differenze significative tra i gruppi",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ] : [
-          "Si accetta H₀: tutti i gruppi hanno medie uguali",
-          "Si accetta H₀: non ci sono differenze significative",
-          "Si rifiuta H₀: almeno un gruppo differisce significativamente",
-          "Si rifiuta H₀: esistono differenze tra i gruppi"
+          "Si accetta H₀: non ci sono differenze significative tra i gruppi",
+          "Si rifiuta H₀: almeno uno dei gruppi differisce significativamente dagli altri",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ],
         correct: 0,
         test: "Test ANOVA"
@@ -742,24 +747,28 @@
     displayQuestions('testAnovaQuestions', questions, 4);
   }
 
-  // Test Chi-quadro
+  // Test Chi-quadro CORRETTO
   function initTestChi() {
-    const reati = ["Rapina", "Spaccio", "Omicidio"];
+    const reati = ["Furto", "Spaccio", "Violenza"];
     const disturbi = ["Borderline", "Antisociale"];
 
+    // Genera frequenze osservate realistiche
     const osservati = [
-      [getInt(1, 5), getInt(3, 8), getInt(0, 4)],
-      [getInt(1, 5), getInt(3, 8), getInt(0, 5)]
+      [getInt(2, 8), getInt(5, 12), getInt(1, 6)],  // Borderline
+      [getInt(3, 9), getInt(4, 10), getInt(2, 7)]   // Antisociale
     ];
 
+    // Calcola totali
     const totRiga = osservati.map(r => r.reduce((a, b) => a + b, 0));
     const totColonna = osservati[0].map((_, j) => osservati[0][j] + osservati[1][j]);
     const totTotale = totRiga.reduce((a, b) => a + b, 0);
 
+    // Calcola frequenze attese
     const attesi = osservati.map((r, i) =>
       r.map((_, j) => (totRiga[i] * totColonna[j]) / totTotale)
     );
 
+    // Calcola Chi-quadro
     let chi2 = 0;
     for (let i = 0; i < 2; i++) {
       for (let j = 0; j < 3; j++) {
@@ -768,12 +777,16 @@
         chi2 += Math.pow(fo - fe, 2) / fe;
       }
     }
-    chi2 = +chi2.toFixed(2);
-    const chiCritico = 5.991; // Valore più preciso
+    chi2 = +chi2.toFixed(3);
+    
+    const df = (2 - 1) * (3 - 1); // df = (righe-1) × (colonne-1) = 2
+    const chi2Critico = 5.991; // χ² critico per df=2, α=0.05
 
+    // Crea tabella delle frequenze osservate
     let tableHtml = `<table><tr><th></th>`;
     reati.forEach(r => tableHtml += `<th>${r}</th>`);
     tableHtml += `<th>Totale</th></tr>`;
+    
     for (let i = 0; i < 2; i++) {
       tableHtml += `<tr><td><strong>${disturbi[i]}</strong></td>`;
       for (let j = 0; j < 3; j++) {
@@ -781,19 +794,20 @@
       }
       tableHtml += `<td><strong>${totRiga[i]}</strong></td></tr>`;
     }
-    tableHtml += `<tr><td><strong>Totale</strong></td>`;
+    
+    tableHtml += `<tr style="background: #e3f2fd;"><td><strong>Totale</strong></td>`;
     totColonna.forEach(t => tableHtml += `<td><strong>${t}</strong></td>`);
     tableHtml += `<td><strong>${totTotale}</strong></td></tr></table>`;
 
     document.getElementById('testChiData').innerHTML = `
       <h4>Scenario del Test Chi-quadro</h4>
-      <p><strong>Ipotesi nulla (H₀):</strong> non c'è associazione tra tipo di reato e disturbo di personalità.</p>
-      <p>Tabella delle frequenze osservate:</p>
+      <p><strong>Ipotesi:</strong> H₀: Non c'è associazione tra tipo di reato e disturbo di personalità</p>
+      <p><strong>Frequenze osservate:</strong></p>
       ${tableHtml}
       <div class="stats-summary">
-        <p><strong>Gradi di libertà:</strong> df = (righe-1) × (colonne-1) = 2</p>
+        <p><strong>Gradi di libertà:</strong> df = (righe-1) × (colonne-1) = ${df}</p>
         <p><strong>Formula χ²:</strong> Σ[(Fo - Fe)² / Fe]</p>
-        <p><strong>χ² critico:</strong> ${chiCritico} (α = 0.05, df = 2)</p>
+        <p><strong>χ² critico:</strong> ${chi2Critico} (α = 0.05, df = ${df})</p>
       </div>
     `;
 
@@ -801,9 +815,9 @@
       {
         text: "Qual è il valore del chi-quadro calcolato?",
         options: [
-          (chi2 - 1).toFixed(2),
-          chi2.toFixed(2),
-          (chi2 + 1).toFixed(2),
+          (chi2 - 1).toFixed(3),
+          chi2.toFixed(3),
+          (chi2 + 1).toFixed(3),
           "5.991"
         ],
         correct: 1,
@@ -811,16 +825,16 @@
       },
       {
         text: "Qual è la conclusione del test?",
-        options: chi2 > chiCritico ? [
-          "Si rifiuta H₀: esiste un'associazione tra reato e disturbo",
-          "Si rifiuta H₀: le variabili sono statisticamente dipendenti",
-          "Si accetta H₀: le variabili sono indipendenti",
-          "Si accetta H₀: non c'è associazione significativa"
+        options: chi2 > chi2Critico ? [
+          "Si rifiuta H₀: esiste un'associazione significativa tra reato e disturbo",
+          "Si accetta H₀: non c'è associazione significativa tra le variabili",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ] : [
-          "Si accetta H₀: le variabili sono indipendenti",
-          "Si accetta H₀: non c'è associazione significativa", 
-          "Si rifiuta H₀: esiste un'associazione tra reato e disturbo",
-          "Si rifiuta H₀: le variabili sono dipendenti"
+          "Si accetta H₀: non c'è associazione significativa tra le variabili",
+          "Si rifiuta H₀: esiste un'associazione significativa tra reato e disturbo",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ],
         correct: 0,
         test: "Test Chi-quadro"
@@ -831,17 +845,21 @@
     displayQuestions('testChiQuestions', questions, 6);
   }
 
-  // Test Correlazione
+  // Test Correlazione CORRETTO
   function initTestCorrelation() {
-    const moralita = Array.from({ length: 5 }, () => Math.floor(Math.random() * 5) + 3);
-    const reati = Array.from({ length: 5 }, () => Math.floor(Math.random() * 5));
-    const n = moralita.length;
+    // Genera dati con correlazione controllata
+    const n = 6;
+    const baseX = Array.from({ length: n }, () => getInt(3, 8));
+    const baseY = baseX.map(x => x + getInt(-2, 2)); // Correlazione approssimativa
+    
+    const moralita = baseX;
+    const reati = baseY;
 
-    // Medie
-    const mediaX = moralita.reduce((a, b) => a + b) / n;
-    const mediaY = reati.reduce((a, b) => a + b) / n;
+    // Calcola statistiche
+    const mediaX = mean(moralita);
+    const mediaY = mean(reati);
 
-    // Calcoli per correlazione
+    // Calcoli per correlazione con formule corrette
     let sommaXY = 0, sommaX2 = 0, sommaY2 = 0;
     let tableRows = '';
 
@@ -851,10 +869,12 @@
       const dx = x - mediaX;
       const dy = y - mediaY;
       const dxdy = dx * dy;
+      const dx2 = dx * dx;
+      const dy2 = dy * dy;
 
       sommaXY += dxdy;
-      sommaX2 += dx * dx;
-      sommaY2 += dy * dy;
+      sommaX2 += dx2;
+      sommaY2 += dy2;
 
       tableRows += `
         <tr>
@@ -864,22 +884,38 @@
           <td>${dx.toFixed(2)}</td>
           <td>${dy.toFixed(2)}</td>
           <td>${dxdy.toFixed(2)}</td>
+          <td>${dx2.toFixed(2)}</td>
+          <td>${dy2.toFixed(2)}</td>
         </tr>
       `;
     }
 
-    const sigmaX = +(Math.sqrt(sommaX2 / n)).toFixed(2);
-    const sigmaY = +(Math.sqrt(sommaY2 / n)).toFixed(2);
-    const r = +(sommaXY / Math.sqrt(sommaX2 * sommaY2)).toFixed(2);
-    const df = n - 2; // GRADI DI LIBERTÀ CORRETTI
-    const t = +(r * Math.sqrt(df) / Math.sqrt(1 - r * r)).toFixed(2);
-    const tCritico = getTCritical(df, 0.05, true); // TEST BILATERALE
+    // Aggiungi riga totali
+    tableRows += `
+      <tr style="background: #e3f2fd; font-weight: bold;">
+        <td>Σ</td>
+        <td>${moralita.reduce((a,b) => a+b, 0)}</td>
+        <td>${reati.reduce((a,b) => a+b, 0)}</td>
+        <td>-</td>
+        <td>-</td>
+        <td>${sommaXY.toFixed(2)}</td>
+        <td>${sommaX2.toFixed(2)}</td>
+        <td>${sommaY2.toFixed(2)}</td>
+      </tr>
+    `;
+
+    // Calcola correlazione
+    const r = sommaXY / Math.sqrt(sommaX2 * sommaY2);
+    const df = n - 2;
+    const t = (r * Math.sqrt(df)) / Math.sqrt(1 - r * r);
+    const tCritico = getTCritical(df, 0.05, true); // Test bilaterale
 
     const correlationTable = `
       <table>
         <tr>
-          <th>Sogg</th><th>X (Moralità)</th><th>Y (Reati)</th>
+          <th>Sogg</th><th>X</th><th>Y</th>
           <th>X − X̄</th><th>Y − Ȳ</th><th>(X−X̄)(Y−Ȳ)</th>
+          <th>(X−X̄)²</th><th>(Y−Ȳ)²</th>
         </tr>
         ${tableRows}
       </table>
@@ -887,14 +923,15 @@
 
     document.getElementById('testCorrelationData').innerHTML = `
       <h4>Scenario del Test di Correlazione</h4>
-      <p><strong>Obiettivo:</strong> Verificare se esiste un'associazione lineare tra il punteggio di moralità e il numero di reati lievi.</p>
+      <p><strong>Obiettivo:</strong> Verificare se esiste correlazione significativa tra moralità e numero di reati</p>
+      <p><strong>Ipotesi:</strong> H₀: ρ = 0 (non c'è correlazione nella popolazione)</p>
       ${correlationTable}
       <div class="stats-summary">
-        <p><strong>X̄</strong> = ${mediaX.toFixed(2)} | <strong>Ȳ</strong> = ${mediaY.toFixed(2)}</p>
-        <p><strong>Formula r:</strong> r = Σ(X−X̄)(Y−Ȳ) / √[Σ(X−X̄)²Σ(Y−Ȳ)²]</p>
+        <p><strong>Medie:</strong> X̄ = ${mediaX.toFixed(2)}, Ȳ = ${mediaY.toFixed(2)}</p>
+        <p><strong>Formula r:</strong> r = Σ(X−X̄)(Y−Ȳ) / √[Σ(X−X̄)²·Σ(Y−Ȳ)²]</p>
         <p><strong>Formula t:</strong> t = r√(n-2) / √(1-r²)</p>
         <p><strong>Gradi di libertà:</strong> df = n - 2 = ${df}</p>
-        <p><strong>t critico:</strong> ±${tCritico.toFixed(3)} (test bilaterale, α = 0.05, df = ${df})</p>
+        <p><strong>t critico:</strong> ±${tCritico.toFixed(3)} (test bilaterale, α = 0.05)</p>
       </div>
     `;
 
@@ -902,37 +939,37 @@
       {
         text: "Qual è il valore del coefficiente di correlazione r?",
         options: [
-          (r - 0.1).toFixed(2),
-          r.toFixed(2),
-          (r + 0.1).toFixed(2),
-          "0.00"
+          (r - 0.1).toFixed(3),
+          r.toFixed(3),
+          (r + 0.1).toFixed(3),
+          "0.000"
         ],
         correct: 1,
         test: "Test Correlazione"
       },
       {
-        text: "Qual è il valore di t calcolato per testare la significatività della correlazione?",
+        text: "Qual è il valore di t calcolato per testare la significatività?",
         options: [
-          (t - 0.5).toFixed(2),
-          t.toFixed(2),
-          (t + 0.5).toFixed(2),
-          tCritico.toFixed(2)
+          (t - 0.5).toFixed(3),
+          t.toFixed(3),
+          (t + 0.5).toFixed(3),
+          tCritico.toFixed(3)
         ],
         correct: 1,
         test: "Test Correlazione"
       },
       {
-        text: "Qual è la conclusione del test t per la correlazione?",
+        text: "Qual è la conclusione del test?",
         options: Math.abs(t) > tCritico ? [
           "Si rifiuta H₀: esiste una correlazione significativa",
-          "Si rifiuta H₀: le variabili sono linearmente correlate",
-          "Si accetta H₀: nessuna correlazione significativa", 
-          "Si accetta H₀: le variabili sono indipendenti"
+          "Si accetta H₀: non c'è correlazione significativa",
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ] : [
-          "Si accetta H₀: nessuna correlazione significativa",
-          "Si accetta H₀: le variabili sono indipendenti",
+          "Si accetta H₀: non c'è correlazione significativa",
           "Si rifiuta H₀: esiste una correlazione significativa",
-          "Si rifiuta H₀: le variabili sono correlate"
+          "Il test è inconclusivo",
+          "Non si può determinare"
         ],
         correct: 0,
         test: "Test Correlazione"
@@ -949,7 +986,7 @@
       const qIndex = startIndex + i;
       html += `
         <div class="question">
-          <h4>${q.text}</h4>
+          <h4>Domanda ${qIndex + 1}: ${q.text}</h4>
           ${q.options.map((opt, optIndex) => `
             <div class="option">
               <input type="radio" name="q${qIndex}" value="${optIndex}" id="q${qIndex}_${optIndex}">
@@ -996,6 +1033,7 @@
       if (isCorrect) correctCount++;
 
       results.push({
+        questionNumber: i + 1,
         questionText: question.text,
         test: question.test,
         selectedAnswer: selectedAnswer ? question.options[parseInt(selectedAnswer.value)] : "Nessuna risposta",
@@ -1020,20 +1058,42 @@
     document.getElementById('finalTime').textContent = `Tempo impiegato: ${minutes}:${seconds.toString().padStart(2, '0')}`;
 
     let detailedHtml = '<h3>Riepilogo dettagliato:</h3>';
-    detailedResults.forEach((result, index) => {
+    
+    // Raggruppa per test
+    const testGroups = {};
+    detailedResults.forEach(result => {
+      if (!testGroups[result.test]) {
+        testGroups[result.test] = [];
+      }
+      testGroups[result.test].push(result);
+    });
+
+    // Mostra risultati raggruppati per test
+    Object.keys(testGroups).forEach(testName => {
+      const testResults = testGroups[testName];
+      const correctInTest = testResults.filter(r => r.isCorrect).length;
+      
       detailedHtml += `
-        <div class="result-item ${result.isCorrect ? 'correct' : 'incorrect'}">
-          <div>
-            <strong>${result.test} - Domanda ${index + 1}</strong><br>
-            <em>${result.questionText}</em><br>
-            <small>Tua risposta: ${result.selectedAnswer}</small><br>
-            ${!result.isCorrect ? `<small>Risposta corretta: ${result.correctAnswer}</small>` : ''}
-          </div>
-          <div class="status-icon">
-            ${result.isCorrect ? '✅' : '❌'}
-          </div>
+        <div style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+          <h4>${testName}: ${correctInTest}/${testResults.length} corrette</h4>
         </div>
       `;
+      
+      testResults.forEach(result => {
+        detailedHtml += `
+          <div class="result-item ${result.isCorrect ? 'correct' : 'incorrect'}">
+            <div>
+              <strong>Domanda ${result.questionNumber}</strong><br>
+              <em>${result.questionText}</em><br>
+              <small><strong>Tua risposta:</strong> ${result.selectedAnswer}</small><br>
+              ${!result.isCorrect ? `<small><strong>Risposta corretta:</strong> ${result.correctAnswer}</small>` : ''}
+            </div>
+            <div class="status-icon">
+              ${result.isCorrect ? '✅' : '❌'}
+            </div>
+          </div>
+        `;
+      });
     });
 
     document.getElementById('detailedResults').innerHTML = detailedHtml;
